@@ -441,6 +441,7 @@ Only include players actually affected. rankChange should be 1-5 spots max. Retu
       })
     });
     const data=await res.json();
+    console.log('API response:', JSON.stringify(data));
     const raw=data.content?.find(c=>c.type==='text')?.text||'{}';
     const parsed=JSON.parse(raw.replace(/```json|```/g,'').trim());
 
