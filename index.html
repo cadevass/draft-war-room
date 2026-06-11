@@ -78,7 +78,12 @@
   .feed-top { display: flex; gap: 10px; align-items: flex-start; }
   .feed-ts { font-size: 11px; color: var(--muted); white-space: nowrap; padding-top: 1px; }
   .feed-text { flex: 1; line-height: 1.5; font-size: 13px; }
-  .feed-del { color: var(--faint); cursor: pointer; font-size: 12px; padding: 0 2px; flex-shrink: 0; }
+  .feed-actions { display: flex; gap: 4px; align-items: center; flex-shrink: 0; }
+  .feed-override { font-size: 13px; cursor: pointer; padding: 1px 4px; border-radius: 4px; border: none; background: transparent; color: var(--faint); transition: color .15s; line-height: 1; }
+  .feed-override:hover { color: var(--text); }
+  .feed-override.active-pos { color: var(--green); }
+  .feed-override.active-neg { color: var(--red); }
+  .feed-del { color: var(--faint); cursor: pointer; font-size: 12px; padding: 0 2px; }
   .feed-del:hover { color: var(--red); }
   .feed-analysis { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); font-size: 12px; color: var(--muted); line-height: 1.6; }
   .move-tag { display: inline-block; font-size: 11px; padding: 1px 7px; border-radius: 8px; margin: 2px 3px 2px 0; font-weight: 500; }
@@ -305,7 +310,6 @@ const DATA = {
   ]
 };
 
-// localStorage helpers
 function load(key, def) {
   try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : def; } catch(e) { return def; }
 }
@@ -313,14 +317,13 @@ function save(key, val) {
   try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) {}
 }
 
-// State — loaded from localStorage on startup
-let curPos = 'RB';
-let drafted     = load('drafted', {});
-let notes       = load('notes', {});
+let curPos       = 'RB';
+let drafted      = load('drafted', {});
+let notes        = load('notes', {});
 let rankOverrides = load('rankOverrides', {});
 let tierOverrides = load('tierOverrides', {});
 let injOverrides  = load('injOverrides', {});
-let updates     = load('updates', []);
+let updates      = load('updates', []);
 
 function setPos(p, el) {
   curPos = p;
@@ -357,9 +360,9 @@ function render() {
 
     if (search && !p.n.toLowerCase().includes(search) && !p.t.toLowerCase().includes(search)) return;
     if (tierF && String(p.tier) !== tierF) return;
-    if (flagF === 'box'   && !p.box)      return;
-    if (flagF === 'inj'   && !p.inj)      return;
-    if (flagF === 'avail' && isDrafted)   return;
+    if (flagF === 'box'   && !p.box)    return;
+    if (flagF === 'inj'   && !p.inj)    return;
+    if (flagF === 'avail' && isDrafted) return;
 
     if (p.tier !== lastTier) {
       const d = document.createElement('tr');
@@ -371,10 +374,10 @@ function render() {
     idx++;
 
     const tags = [];
-    if (p.box)    tags.push('<span class="tag target">target</span>');
-    if (p.inj)    tags.push('<span class="tag flagged">flagged</span>');
-    if (adj < 0)  tags.push(`<span class="tag up">▲${Math.abs(adj)}</span>`);
-    if (adj > 0)  tags.push(`<span class="tag down">▼${adj}</span>`);
+    if (p.box)     tags.push('<span class="tag target">target</span>');
+    if (p.inj)     tags.push('<span class="tag flagged">flagged</span>');
+    if (adj < 0)   tags.push(`<span class="tag up">▲${Math.abs(adj)}</span>`);
+    if (adj > 0)   tags.push(`<span class="tag down">▼${adj}</span>`);
     if (isDrafted) tags.push('<span class="tag gone">drafted</span>');
 
     const tr = document.createElement('tr');
@@ -394,22 +397,9 @@ function render() {
   });
 }
 
-function saveNote(key, val) {
-  notes[key] = val;
-  save('notes', notes);
-}
-
-function toggleDrafted(key) {
-  drafted[key] = !drafted[key];
-  save('drafted', drafted);
-  render();
-}
-
-function clearDrafted() {
-  drafted = {};
-  save('drafted', drafted);
-  render();
-}
+function saveNote(key, val) { notes[key] = val; save('notes', notes); }
+function toggleDrafted(key) { drafted[key] = !drafted[key]; save('drafted', drafted); render(); }
+function clearDrafted() { drafted = {}; save('drafted', drafted); render(); }
 
 async function addUpdate() {
   const input = document.getElementById('updateInput');
@@ -418,7 +408,7 @@ async function addUpdate() {
 
   const ts = new Date().toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
   const id = Date.now();
-  updates.unshift({id, text, ts, analysis: null, loading: true});
+  updates.unshift({id, text, ts, analysis: null, loading: true, sentimentOverride: null});
   input.value = '';
   renderFeed();
 
@@ -426,11 +416,18 @@ async function addUpdate() {
     players.map(p => `${p.n} (${pos}, ${p.t}, Rank ${p.r}, Tier ${p.tier})`)
   ).join('\n');
 
-  const prompt = `You are a fantasy football analyst. A user has a 2026 PPR draft board:
+  const prompt = `You are a fantasy football analyst assistant helping with a 2026 PPR fantasy draft. A user has this draft board:
 
 ${playerList}
 
-News update: "${text}"
+The user has added this news update: "${text}"
+
+IMPORTANT CONTEXT FOR SENTIMENT:
+- Phrases like "stocks rising", "stock up", "arrow up", "rising stock", upward arrow emojis (📈 ↑ ⬆), or positive analyst reactions mean POSITIVE sentiment
+- Phrases like "stocks falling", "stock down", "arrow down", downward arrow emojis (📉 ↓ ⬇), injury news, suspension news mean NEGATIVE sentiment  
+- Getting more reps, first team reps, snap share increases, target share increases are POSITIVE
+- Losing reps, role changes that reduce opportunity, injury concerns are NEGATIVE
+- Read the full context carefully — a player "lining up with" another star player at the same time can mean POSITIVE opportunity sharing, not negative
 
 Respond with JSON ONLY (no markdown, no backticks, no extra text):
 {
@@ -459,8 +456,8 @@ Only include players actually affected. rankChange should be 1-5 spots max. Retu
         messages: [{role: 'user', content: prompt}]
       })
     });
-    const data = await res.json();
-    const raw  = data.content?.find(c => c.type === 'text')?.text || '{}';
+    const data   = await res.json();
+    const raw    = data.content?.find(c => c.type === 'text')?.text || '{}';
     const parsed = JSON.parse(raw.replace(/```json|```/g, '').trim());
 
     parsed.adjustments?.forEach(adj => {
@@ -492,6 +489,19 @@ Only include players actually affected. rankChange should be 1-5 spots max. Retu
   save('injOverrides', injOverrides);
 }
 
+function overrideSentiment(id, sentiment) {
+  const entry = updates.find(u => u.id === id);
+  if (!entry) return;
+  // Toggle off if same
+  if (entry.sentimentOverride === sentiment) {
+    entry.sentimentOverride = null;
+  } else {
+    entry.sentimentOverride = sentiment;
+  }
+  save('updates', updates);
+  renderFeed();
+}
+
 function removeUpdate(id) {
   updates = updates.filter(u => u.id !== id);
   save('updates', updates);
@@ -503,9 +513,10 @@ function renderFeed() {
   if (!updates.length) { feed.innerHTML = '<div class="no-feed">No updates yet.</div>'; return; }
   feed.innerHTML = '';
   updates.forEach(u => {
-    const sentiment = u.analysis?.sentiment || 'neutral';
+    const effectiveSentiment = u.sentimentOverride || u.analysis?.sentiment || 'neutral';
     const el = document.createElement('div');
-    el.className = `feed-item ${sentiment}`;
+    el.className = `feed-item ${effectiveSentiment}`;
+
     let analysisHtml = '';
     if (u.loading) {
       analysisHtml = '<div class="analysing">Analysing…</div>';
@@ -519,11 +530,19 @@ function renderFeed() {
       });
       analysisHtml = `<div class="feed-analysis">${a.summary}${movesHtml ? '<br><br>' + movesHtml : ''}</div>`;
     }
+
+    const posActive = u.sentimentOverride === 'positive' ? 'active-pos' : '';
+    const negActive = u.sentimentOverride === 'negative' ? 'active-neg' : '';
+
     el.innerHTML = `
       <div class="feed-top">
         <span class="feed-ts">${u.ts}</span>
         <span class="feed-text">${u.text}</span>
-        <span class="feed-del" onclick="removeUpdate(${u.id})">✕</span>
+        <div class="feed-actions">
+          <button class="feed-override ${posActive}" onclick="overrideSentiment(${u.id}, 'positive')" title="Mark positive">↑</button>
+          <button class="feed-override ${negActive}" onclick="overrideSentiment(${u.id}, 'negative')" title="Mark negative">↓</button>
+          <span class="feed-del" onclick="removeUpdate(${u.id})">✕</span>
+        </div>
       </div>${analysisHtml}`;
     feed.appendChild(el);
   });
