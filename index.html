@@ -491,15 +491,38 @@ Only include players actually affected. rankChange should be 1-5 spots max. Retu
 
 function overrideSentiment(id, sentiment) {
   const entry = updates.find(u => u.id === id);
-  if (!entry) return;
-  // Toggle off if same
+  if (!entry || !entry.analysis) return;
+
+  // Reverse previous adjustments if there was an override or original sentiment applied
+  const prevSentiment = entry.sentimentOverride || entry.analysis.sentiment;
+  (entry.analysis.adjustments || []).forEach(adj => {
+    const player = DATA[adj.position]?.find(p => p.n === adj.player);
+    if (!player) return;
+    const key = adj.position + player.r;
+    // Undo the current rank adjustment
+    if (adj.rankChange !== 0) rankOverrides[key] = (rankOverrides[key] || 0) - adj.rankChange;
+  });
+
+  // Toggle off if same button pressed again
   if (entry.sentimentOverride === sentiment) {
     entry.sentimentOverride = null;
+    // Leave adjustments reversed (neutral state)
   } else {
     entry.sentimentOverride = sentiment;
+    // Flip the adjustments — positive means move players UP, negative means move DOWN
+    const flip = sentiment === 'positive' ? -1 : 1;
+    (entry.analysis.adjustments || []).forEach(adj => {
+      const player = DATA[adj.position]?.find(p => p.n === adj.player);
+      if (!player) return;
+      const key = adj.position + player.r;
+      if (adj.rankChange !== 0) rankOverrides[key] = (rankOverrides[key] || 0) + (Math.abs(adj.rankChange) * flip);
+    });
   }
+
   save('updates', updates);
+  save('rankOverrides', rankOverrides);
   renderFeed();
+  render();
 }
 
 function removeUpdate(id) {
