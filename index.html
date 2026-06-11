@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026 Draft War Room</title>
+<style>
+  :root {
+    --bg: #0f0f0f;
+    --surface: #1a1a1a;
+    --surface2: #222;
+    --border: #2e2e2e;
+    --text: #f0f0f0;
+    --muted: #888;
+    --faint: #444;
+    --t1: #f5a97f;
+    --t2: #7ab8f5;
+    --t3: #8fcf6a;
+    --t4: #f5c842;
+    --t5: #888;
+    --green: #8fcf6a;
+    --red: #e05555;
+    --yellow: #f5c842;
+    --font: 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; min-height: 100vh; }
+
+  header { padding: 16px 20px 12px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; position: sticky; top: 0; background: var(--bg); z-index: 10; }
+  header h1 { font-size: 15px; font-weight: 600; letter-spacing: .3px; flex: 1; }
+  .draft-badge { font-size: 11px; padding: 3px 10px; border-radius: 20px; background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
+
+  .toolbar { display: flex; gap: 8px; padding: 12px 20px; flex-wrap: wrap; align-items: center; border-bottom: 1px solid var(--border); }
+  .toolbar input, .toolbar select { background: var(--surface); border: 1px solid var(--border); color: var(--text); border-radius: 8px; padding: 7px 12px; font-size: 13px; outline: none; }
+  .toolbar input { flex: 1; min-width: 140px; }
+  .toolbar input:focus, .toolbar select:focus { border-color: var(--faint); }
+  .toolbar select option { background: var(--surface); }
+  .btn { background: var(--surface); border: 1px solid var(--border); color: var(--muted); border-radius: 8px; padding: 7px 14px; font-size: 13px; cursor: pointer; white-space: nowrap; transition: color .15s, border-color .15s; }
+  .btn:hover { color: var(--text); border-color: var(--faint); }
+
+  .pos-tabs { display: flex; gap: 0; padding: 0 20px; border-bottom: 1px solid var(--border); }
+  .pos-tab { padding: 10px 18px; font-size: 13px; cursor: pointer; color: var(--muted); border-bottom: 2px solid transparent; background: none; border-top: none; border-left: none; border-right: none; transition: color .15s; }
+  .pos-tab.active { color: var(--text); border-bottom-color: var(--text); }
+  .pos-tab:hover { color: var(--text); }
+
+  .legend { display: flex; gap: 16px; padding: 8px 20px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+  .leg { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--muted); }
+  .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+
+  table { width: 100%; border-collapse: collapse; }
+  thead { position: sticky; top: 57px; background: var(--bg); z-index: 5; }
+  th { font-size: 11px; font-weight: 500; color: var(--muted); padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--border); letter-spacing: .4px; text-transform: uppercase; }
+  td { padding: 8px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  tr.player-row:hover td { background: var(--surface); }
+  tr.drafted td { opacity: 0.35; }
+  tr.tier-divider td { background: var(--surface); font-size: 10px; font-weight: 600; color: var(--muted); padding: 4px 12px; letter-spacing: 1px; text-transform: uppercase; }
+
+  .name-cell { display: flex; align-items: center; gap: 8px; }
+  .rank { color: var(--muted); font-size: 12px; min-width: 22px; }
+  .tag { display: inline-block; font-size: 10px; padding: 1px 6px; border-radius: 10px; margin-left: 4px; font-weight: 500; }
+  .tag.target { background: rgba(245,200,66,.15); color: var(--yellow); border: 1px solid rgba(245,200,66,.25); }
+  .tag.flagged { background: rgba(224,85,85,.15); color: var(--red); border: 1px solid rgba(224,85,85,.25); }
+  .tag.up { background: rgba(143,207,106,.15); color: var(--green); border: 1px solid rgba(143,207,106,.25); }
+  .tag.down { background: rgba(224,85,85,.15); color: var(--red); border: 1px solid rgba(224,85,85,.25); }
+  .tag.gone { background: rgba(136,136,136,.1); color: var(--muted); border: 1px solid var(--border); }
+  .team { font-size: 11px; color: var(--muted); }
+  .tier-num { font-size: 12px; color: var(--muted); }
+  .notes-input { background: transparent; border: none; border-bottom: 1px solid transparent; color: var(--text); font-size: 12px; width: 100%; outline: none; padding: 2px 0; transition: border-color .15s; }
+  .notes-input:focus { border-bottom-color: var(--faint); }
+  .notes-input::placeholder { color: var(--faint); }
+  input[type=checkbox] { accent-color: var(--green); width: 14px; height: 14px; cursor: pointer; }
+
+  .update-section { padding: 20px; border-top: 1px solid var(--border); }
+  .update-section h3 { font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 12px; }
+  .update-input-row { display: flex; gap: 8px; margin-bottom: 14px; }
+  .update-input-row input { flex: 1; background: var(--surface); border: 1px solid var(--border); color: var(--text); border-radius: 8px; padding: 9px 14px; font-size: 13px; outline: none; }
+  .update-input-row input:focus { border-color: var(--faint); }
+  .add-btn { background: var(--surface2); border: 1px solid var(--border); color: var(--text); border-radius: 8px; padding: 9px 18px; font-size: 13px; cursor: pointer; font-weight: 500; white-space: nowrap; transition: border-color .15s; }
+  .add-btn:hover { border-color: var(--faint); }
+
+  .feed { display: flex; flex-direction: column; gap: 8px; }
+  .feed-item { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; }
+  .feed-item.positive { border-left: 3px solid var(--green); }
+  .feed-item.negative { border-left: 3px solid var(--red); }
+  .feed-item.neutral { border-left: 3px solid var(--faint); }
+  .feed-top { display: flex; gap: 10px; align-items: flex-start; }
+  .feed-ts { font-size: 11px; color: var(--muted); white-space: nowrap; padding-top: 1px; }
+  .feed-text { flex: 1; line-height: 1.5; font-size: 13px; }
+  .feed-del { color: var(--faint); cursor: pointer; font-size: 12px; padding: 0 2px; flex-shrink: 0; }
+  .feed-del:hover { color: var(--red); }
+  .feed-analysis { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); font-size: 12px; color: var(--muted); line-height: 1.6; }
+  .move-tag { display: inline-block; font-size: 11px; padding: 1px 7px; border-radius: 8px; margin: 2px 3px 2px 0; font-weight: 500; }
+  .move-tag.up { background: rgba(143,207,106,.15); color: var(--green); }
+  .move-tag.down { background: rgba(224,85,85,.15); color: var(--red); }
+  .move-tag.watch { background: rgba(245,200,66,.15); color: var(--yellow); }
+  .analysing { font-size: 12px; color: var(--muted); font-style: italic; margin-top: 8px; }
+  .no-feed { font-size: 13px; color: var(--faint); padding: 8px 0; }
+
+  @media (max-width: 600px) {
+    .toolbar { padding: 10px 12px; }
+    td, th { padding: 7px 8px; }
+    header { padding: 12px 14px; }
+    .pos-tab { padding: 10px 12px; font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>2026 Draft War Room</h1>
+  <span class="draft-badge">PPR</span>
+</header>
+
+<div class="toolbar">
+  <input type="text" id="search" placeholder="Search player or team…" oninput="render()">
+  <select id="tierFilter" onchange="render()">
+    <option value="">All tiers</option>
+    <option value="1">Tier 1</option>
+    <option value="2">Tier 2</option>
+    <option value="3">Tier 3</option>
+    <option value="4">Tier 4</option>
+    <option value="5">Tier 5</option>
+    <option value="6">Tier 6</option>
+  </select>
+  <select id="flagFilter" onchange="render()">
+    <option value="">All players</option>
+    <option value="box">Targets only</option>
+    <option value="inj">Flagged only</option>
+    <option value="avail">Hide drafted</option>
+  </select>
+  <button class="btn" onclick="clearDrafted()">Clear drafted</button>
+</div>
+
+<div class="pos-tabs">
+  <button class="pos-tab active" onclick="setPos('RB',this)">RB</button>
+  <button class="pos-tab" onclick="setPos('WR',this)">WR</button>
+  <button class="pos-tab" onclick="setPos('TE',this)">TE</button>
+  <button class="pos-tab" onclick="setPos('QB',this)">QB</button>
+</div>
+
+<div class="legend">
+  <div class="leg"><span class="dot" style="background:var(--t1)"></span>Tier 1</div>
+  <div class="leg"><span class="dot" style="background:var(--t2)"></span>Tier 2</div>
+  <div class="leg"><span class="dot" style="background:var(--t3)"></span>Tier 3</div>
+  <div class="leg"><span class="dot" style="background:var(--t4)"></span>Tier 4</div>
+  <div class="leg"><span class="dot" style="background:var(--t5)"></span>Tier 5</div>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Player</th>
+      <th>Team</th>
+      <th>Tier</th>
+      <th>Notes</th>
+      <th>Out</th>
+    </tr>
+  </thead>
+  <tbody id="tbody"></tbody>
+</table>
+
+<div class="update-section">
+  <h3>News & Updates</h3>
+  <div class="update-input-row">
+    <input type="text" id="updateInput" placeholder="Paste tweet or note — AI adjusts rankings automatically…" onkeydown="if(event.key==='Enter')addUpdate()">
+    <button class="add-btn" onclick="addUpdate()">Add ↗</button>
+  </div>
+  <div class="feed" id="feed"><div class="no-feed">No updates yet.</div></div>
+</div>
+
+<script>
+const PROXY = 'https://fantasy-football-coach.cade-vassalllo06.workers.dev/';
+
+const TIER_COLORS = ['','var(--t1)','var(--t2)','var(--t3)','var(--t4)','var(--t5)','var(--t5)'];
+
+const DATA = {
+  RB:[
+    {r:1,n:'Bijan Robinson',t:'ATL',tier:1,box:false,inj:false},
+    {r:2,n:'Jahmyr Gibbs',t:'DET',tier:1,box:false,inj:false},
+    {r:3,n:'Christian McCaffrey',t:'SF',tier:1,box:false,inj:false},
+    {r:4,n:'James Cook',t:'BUF',tier:1,box:false,inj:false},
+    {r:5,n:'Jonathan Taylor',t:'IND',tier:1,box:false,inj:false},
+    {r:6,n:'Ashton Jeanty',t:'LV',tier:2,box:true,inj:false},
+    {r:7,n:'Omarion Hampton',t:'LAC',tier:2,box:false,inj:false},
+    {r:8,n:'Chase Brown',t:'CIN',tier:2,box:false,inj:false},
+    {r:9,n:'Kenneth Walker',t:'KC',tier:2,box:false,inj:false},
+    {r:10,n:"De'Von Achane",t:'MIA',tier:2,box:false,inj:false},
+    {r:11,n:'Derrick Henry',t:'BAL',tier:2,box:false,inj:false},
+    {r:12,n:'Saquon Barkley',t:'PHI',tier:2,box:false,inj:false},
+    {r:13,n:'Jeremiyah Love',t:'ARI',tier:3,box:true,inj:false},
+    {r:14,n:'Kyren Williams',t:'LAR',tier:3,box:false,inj:false},
+    {r:15,n:'Breece Hall',t:'NYJ',tier:3,box:false,inj:false},
+    {r:16,n:'Javonte Williams',t:'DEN',tier:3,box:false,inj:false},
+    {r:17,n:'Josh Jacobs',t:'GB',tier:3,box:false,inj:true},
+    {r:18,n:'Cam Skattebo',t:'NYG',tier:3,box:false,inj:false},
+    {r:19,n:'Quinshon Judkins',t:'CLE',tier:3,box:false,inj:false},
+    {r:20,n:'David Montgomery',t:'HOU',tier:3,box:false,inj:false},
+    {r:21,n:'Travis Etienne Jr.',t:'NO',tier:3,box:false,inj:false},
+    {r:22,n:"D'Andre Swift",t:'CHI',tier:3,box:false,inj:false},
+    {r:23,n:'Bucky Irving',t:'TB',tier:4,box:false,inj:false},
+    {r:24,n:'Jadarian Price',t:'SEA',tier:4,box:false,inj:false},
+    {r:25,n:'Bhayshul Tuten',t:'JAX',tier:4,box:false,inj:false},
+    {r:26,n:'Rhamondre Stevenson',t:'NE',tier:4,box:false,inj:false},
+    {r:27,n:'JK Dobbins',t:'DEN',tier:4,box:false,inj:false},
+    {r:28,n:'Jaylen Warren',t:'PIT',tier:4,box:false,inj:false},
+    {r:29,n:'TreVeyon Henderson',t:'NE',tier:4,box:false,inj:false},
+    {r:30,n:'Tony Pollard',t:'TEN',tier:4,box:false,inj:false},
+    {r:31,n:'Chuba Hubbard',t:'CAR',tier:5,box:false,inj:false},
+    {r:32,n:'Rico Dowdle',t:'PIT',tier:5,box:false,inj:false},
+    {r:33,n:'RJ Harvey',t:'DEN',tier:5,box:false,inj:false},
+    {r:34,n:'Aaron Jones',t:'MIN',tier:5,box:false,inj:false},
+    {r:35,n:'Blake Corum',t:'LAR',tier:5,box:false,inj:false},
+    {r:36,n:'Kenneth Gainwell',t:'TB',tier:5,box:true,inj:false},
+    {r:37,n:'Chris Rodriguez Jr.',t:'JAX',tier:5,box:false,inj:false},
+    {r:38,n:'Tyrone Tracy',t:'NYG',tier:5,box:false,inj:false},
+    {r:39,n:'Jonathan Brooks',t:'CAR',tier:5,box:false,inj:false},
+    {r:40,n:'Rachaad White',t:'WAS',tier:5,box:false,inj:false},
+  ],
+  WR:[
+    {r:1,n:"Ja'Marr Chase",t:'CIN',tier:1,box:false,inj:false},
+    {r:2,n:'Puka Nacua',t:'LAR',tier:1,box:false,inj:false},
+    {r:3,n:'Jaxon Smith-Njigba',t:'SEA',tier:1,box:false,inj:false},
+    {r:4,n:'Amon-Ra St. Brown',t:'DET',tier:1,box:false,inj:false},
+    {r:5,n:'Justin Jefferson',t:'MIN',tier:1,box:false,inj:false},
+    {r:6,n:'Drake London',t:'ATL',tier:2,box:true,inj:false},
+    {r:7,n:'CeeDee Lamb',t:'DAL',tier:2,box:false,inj:false},
+    {r:8,n:'AJ Brown',t:'NE',tier:2,box:false,inj:false},
+    {r:9,n:'Nico Collins',t:'HOU',tier:2,box:false,inj:false},
+    {r:10,n:'George Pickens',t:'DAL',tier:2,box:false,inj:false},
+    {r:11,n:'Ladd McConkey',t:'LAC',tier:3,box:true,inj:false},
+    {r:12,n:'DeVonta Smith',t:'PHI',tier:3,box:false,inj:false},
+    {r:13,n:'Garrett Wilson',t:'NYJ',tier:3,box:false,inj:false},
+    {r:14,n:'Malik Nabers',t:'NYG',tier:3,box:false,inj:true},
+    {r:15,n:'Tee Higgins',t:'CIN',tier:3,box:true,inj:false},
+    {r:16,n:'Rashee Rice',t:'KC',tier:3,box:false,inj:true},
+    {r:17,n:'Chris Olave',t:'NO',tier:3,box:false,inj:false},
+    {r:18,n:'Terry McLaurin',t:'WAS',tier:4,box:true,inj:false},
+    {r:19,n:'Emeka Egbuka',t:'TB',tier:4,box:false,inj:false},
+    {r:20,n:'Zay Flowers',t:'BAL',tier:4,box:false,inj:false},
+    {r:21,n:'Mike Evans',t:'SF',tier:4,box:true,inj:false},
+    {r:22,n:'Luther Burden',t:'CHI',tier:4,box:false,inj:false},
+    {r:23,n:'Tetairoa McMillan',t:'CAR',tier:4,box:false,inj:false},
+    {r:24,n:'Davante Adams',t:'LAR',tier:4,box:false,inj:false},
+    {r:25,n:'Jaylen Waddle',t:'DEN',tier:4,box:false,inj:false},
+    {r:26,n:'Christian Watson',t:'GB',tier:4,box:false,inj:false},
+    {r:27,n:'Rome Odunze',t:'CHI',tier:4,box:false,inj:false},
+    {r:28,n:'Carnell Tate',t:'TEN',tier:4,box:false,inj:false},
+    {r:29,n:'Parker Washington',t:'JAX',tier:4,box:false,inj:false},
+    {r:30,n:'Jameson Williams',t:'DET',tier:4,box:false,inj:false},
+    {r:31,n:'Marvin Harrison Jr.',t:'ARI',tier:5,box:false,inj:false},
+    {r:32,n:'Alec Pierce',t:'IND',tier:5,box:false,inj:false},
+    {r:33,n:'Jordyn Tyson',t:'NO',tier:5,box:false,inj:false},
+    {r:34,n:'DJ Moore',t:'BUF',tier:5,box:false,inj:false},
+    {r:35,n:'Courtland Sutton',t:'DEN',tier:5,box:false,inj:false},
+    {r:36,n:'Brian Thomas Jr.',t:'JAX',tier:5,box:false,inj:false},
+    {r:37,n:'Ricky Pearsall',t:'SF',tier:5,box:false,inj:false},
+    {r:38,n:'Makai Lemon',t:'PHI',tier:5,box:false,inj:false},
+    {r:39,n:'Michael Pittman Jr.',t:'PIT',tier:6,box:false,inj:false},
+    {r:40,n:'Michael Wilson',t:'ARI',tier:6,box:false,inj:false},
+  ],
+  TE:[
+    {r:1,n:'Brock Bowers',t:'LV',tier:1,box:false,inj:false},
+    {r:2,n:'Trey McBride',t:'ARI',tier:1,box:false,inj:false},
+    {r:3,n:'Colston Loveland',t:'CHI',tier:2,box:false,inj:false},
+    {r:4,n:'Tucker Kraft',t:'GB',tier:2,box:false,inj:false},
+    {r:5,n:'Tyler Warren',t:'IND',tier:2,box:false,inj:false},
+    {r:6,n:'Sam LaPorta',t:'DET',tier:2,box:false,inj:false},
+    {r:7,n:'Harold Fannin Jr.',t:'CLE',tier:2,box:false,inj:false},
+    {r:8,n:'Kyle Pitts',t:'ATL',tier:2,box:false,inj:false},
+    {r:9,n:'George Kittle',t:'SF',tier:2,box:false,inj:true},
+    {r:10,n:'Dallas Goedert',t:'PHI',tier:3,box:true,inj:false},
+    {r:11,n:'Mark Andrews',t:'BAL',tier:3,box:false,inj:false},
+    {r:12,n:'Travis Kelce',t:'KC',tier:3,box:false,inj:false},
+    {r:13,n:'Dalton Kincaid',t:'BUF',tier:3,box:true,inj:false},
+    {r:14,n:'Jake Ferguson',t:'DAL',tier:3,box:false,inj:false},
+    {r:15,n:'Chig Onkowko',t:'WAS',tier:4,box:true,inj:false},
+    {r:16,n:'Isaiah Likely',t:'NYG',tier:4,box:false,inj:false},
+    {r:17,n:'Oronde Gadsden',t:'LAC',tier:4,box:true,inj:false},
+    {r:18,n:'Kenyon Sadiq',t:'NYJ',tier:4,box:false,inj:false},
+    {r:19,n:'Hunter Henry',t:'NE',tier:4,box:false,inj:false},
+    {r:20,n:'Brenton Strange',t:'JAX',tier:4,box:false,inj:false},
+    {r:21,n:'Dalton Schultz',t:'HOU',tier:4,box:false,inj:false},
+    {r:22,n:'AJ Barner',t:'SEA',tier:4,box:false,inj:false},
+    {r:23,n:'TJ Hockenson',t:'MIN',tier:4,box:false,inj:false},
+    {r:24,n:'Gunnar Helm',t:'TEN',tier:5,box:true,inj:false},
+    {r:25,n:'Greg Dulcich',t:'MIA',tier:5,box:false,inj:false},
+  ],
+  QB:[
+    {r:1,n:'Josh Allen',t:'BUF',tier:1,box:false,inj:false},
+    {r:2,n:'Lamar Jackson',t:'BAL',tier:1,box:false,inj:false},
+    {r:3,n:'Drake Maye',t:'NE',tier:2,box:true,inj:false},
+    {r:4,n:'Jayden Daniels',t:'WAS',tier:2,box:false,inj:false},
+    {r:5,n:'Joe Burrow',t:'CIN',tier:2,box:false,inj:false},
+    {r:6,n:'Justin Herbert',t:'LAC',tier:2,box:false,inj:false},
+    {r:7,n:'Jalen Hurts',t:'PHI',tier:2,box:false,inj:false},
+    {r:8,n:'Jaxson Dart',t:'NYG',tier:3,box:true,inj:false},
+    {r:9,n:'Trevor Lawrence',t:'JAX',tier:3,box:false,inj:false},
+    {r:10,n:'Caleb Williams',t:'CHI',tier:3,box:false,inj:false},
+    {r:11,n:'Brock Purdy',t:'SF',tier:3,box:false,inj:false},
+    {r:12,n:'Kyler Murray',t:'ARI',tier:3,box:false,inj:false},
+    {r:13,n:'Matthew Stafford',t:'LAR',tier:3,box:false,inj:false},
+    {r:14,n:'Dak Prescott',t:'DAL',tier:3,box:false,inj:false},
+    {r:15,n:'Jared Goff',t:'DET',tier:3,box:false,inj:false},
+    {r:16,n:'Patrick Mahomes',t:'KC',tier:3,box:false,inj:true},
+    {r:17,n:'Bo Nix',t:'DEN',tier:4,box:false,inj:true},
+    {r:18,n:'Jordan Love',t:'GB',tier:4,box:false,inj:false},
+    {r:19,n:'Tyler Shough',t:'NO',tier:4,box:true,inj:false},
+    {r:20,n:'Baker Mayfield',t:'TB',tier:4,box:false,inj:false},
+    {r:21,n:'Daniel Jones',t:'IND',tier:4,box:false,inj:false},
+    {r:22,n:'Malik Willis',t:'MIA',tier:4,box:false,inj:false},
+    {r:23,n:'Sam Darnold',t:'SEA',tier:5,box:false,inj:false},
+    {r:24,n:'Cam Ward',t:'TEN',tier:5,box:false,inj:false},
+    {r:25,n:'Bryce Young',t:'CAR',tier:5,box:false,inj:false},
+  ]
+};
+
+let curPos='RB', drafted={}, notes={}, rankOverrides={}, tierOverrides={}, injOverrides={}, updates=[];
+
+function setPos(p,el){
+  curPos=p;
+  document.querySelectorAll('.pos-tab').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  render();
+}
+
+function getPlayers(pos){
+  return DATA[pos].map(p=>{
+    const key=pos+p.r;
+    return {
+      ...p,
+      tier: tierOverrides[key]!==undefined ? tierOverrides[key] : p.tier,
+      inj: injOverrides[key]!==undefined ? injOverrides[key] : p.inj,
+    };
+  }).sort((a,b)=>(a.r+(rankOverrides[curPos+a.r]||0))-(b.r+(rankOverrides[curPos+b.r]||0)));
+}
+
+function render(){
+  const search=document.getElementById('search').value.toLowerCase();
+  const tierF=document.getElementById('tierFilter').value;
+  const flagF=document.getElementById('flagFilter').value;
+  const tbody=document.getElementById('tbody');
+  tbody.innerHTML='';
+  let players=getPlayers(curPos);
+  let lastTier=null, idx=0;
+
+  players.forEach(p=>{
+    const key=curPos+p.r;
+    const isDrafted=!!drafted[key];
+    const note=notes[key]||'';
+    const adj=rankOverrides[key]||0;
+
+    if(search && !p.n.toLowerCase().includes(search) && !p.t.toLowerCase().includes(search)) return;
+    if(tierF && String(p.tier)!==tierF) return;
+    if(flagF==='box' && !p.box) return;
+    if(flagF==='inj' && !p.inj) return;
+    if(flagF==='avail' && isDrafted) return;
+
+    if(p.tier!==lastTier){
+      const d=document.createElement('tr');
+      d.className='tier-divider';
+      d.innerHTML=`<td colspan="6">— Tier ${p.tier}</td>`;
+      tbody.appendChild(d);
+      lastTier=p.tier;
+    }
+    idx++;
+
+    const tags=[];
+    if(p.box) tags.push('<span class="tag target">target</span>');
+    if(p.inj) tags.push('<span class="tag flagged">flagged</span>');
+    if(adj<0) tags.push(`<span class="tag up">▲${Math.abs(adj)}</span>`);
+    if(adj>0) tags.push(`<span class="tag down">▼${adj}</span>`);
+    if(isDrafted) tags.push('<span class="tag gone">drafted</span>');
+
+    const tr=document.createElement('tr');
+    tr.className='player-row'+(isDrafted?' drafted':'');
+    tr.innerHTML=`
+      <td class="rank">${idx}</td>
+      <td><div class="name-cell">
+        <span class="dot" style="background:${TIER_COLORS[p.tier]}"></span>
+        ${p.n}${tags.join('')}
+      </div></td>
+      <td class="team">${p.t}</td>
+      <td class="tier-num">${p.tier}</td>
+      <td><input class="notes-input" type="text" value="${(note||'').replace(/"/g,'&quot;')}" placeholder="—" onchange="saveNote('${key}',this.value)"></td>
+      <td><input type="checkbox" ${isDrafted?'checked':''} onchange="toggleDrafted('${key}')"></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function saveNote(key,val){ notes[key]=val; }
+function toggleDrafted(key){ drafted[key]=!drafted[key]; render(); }
+function clearDrafted(){ drafted={}; render(); }
+
+async function addUpdate(){
+  const input=document.getElementById('updateInput');
+  const text=input.value.trim();
+  if(!text) return;
+  const ts=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  const id=Date.now();
+  updates.unshift({id,text,ts,analysis:null,loading:true});
+  input.value='';
+  renderFeed();
+
+  const playerList=Object.entries(DATA).flatMap(([pos,players])=>
+    players.map(p=>`${p.n} (${pos}, ${p.t}, Rank ${p.r}, Tier ${p.tier})`)
+  ).join('\n');
+
+  const prompt=`You are a fantasy football analyst. A user has a 2026 PPR draft board:
+
+${playerList}
+
+News update: "${text}"
+
+Respond with JSON ONLY (no markdown, no backticks, no extra text):
+{
+  "sentiment": "positive"|"negative"|"neutral",
+  "summary": "1-2 sentence plain English fantasy impact",
+  "adjustments": [
+    {
+      "player": "exact name from list above",
+      "position": "RB|WR|TE|QB",
+      "rankChange": number (negative=move up, positive=move down, 0=unchanged),
+      "tierChange": number (negative=better tier, positive=worse tier, 0=unchanged),
+      "flagged": true|false,
+      "reason": "brief reason"
+    }
+  ]
+}
+Only include players actually affected. rankChange should be 1-5 spots max. Return empty adjustments array if no players identifiable.`;
+
+  try{
+    const res=await fetch(PROXY,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        messages:[{role:'user',content:prompt}]
+      })
+    });
+    const data=await res.json();
+    const raw=data.content?.find(c=>c.type==='text')?.text||'{}';
+    const parsed=JSON.parse(raw.replace(/```json|```/g,'').trim());
+
+    parsed.adjustments?.forEach(adj=>{
+      const pos=adj.position;
+      const player=DATA[pos]?.find(p=>p.n===adj.player);
+      if(!player) return;
+      const key=pos+player.r;
+      if(adj.rankChange!==0) rankOverrides[key]=(rankOverrides[key]||0)+adj.rankChange;
+      if(adj.tierChange!==0){
+        const base=tierOverrides[key]!==undefined?tierOverrides[key]:player.tier;
+        tierOverrides[key]=Math.max(1,Math.min(6,base+adj.tierChange));
+      }
+      if(adj.flagged) injOverrides[key]=true;
+    });
+
+    const entry=updates.find(u=>u.id===id);
+    if(entry){entry.analysis=parsed;entry.loading=false;}
+  } catch(e){
+    const entry=updates.find(u=>u.id===id);
+    if(entry){entry.analysis={sentiment:'neutral',summary:'Error: '+e.message,adjustments:[]};entry.loading=false;}
+  }
+
+  renderFeed();
+  render();
+}
+
+function removeUpdate(id){
+  updates=updates.filter(u=>u.id!==id);
+  renderFeed();
+}
+
+function renderFeed(){
+  const feed=document.getElementById('feed');
+  if(!updates.length){feed.innerHTML='<div class="no-feed">No updates yet.</div>';return;}
+  feed.innerHTML='';
+  updates.forEach(u=>{
+    const sentiment=u.analysis?.sentiment||'neutral';
+    const el=document.createElement('div');
+    el.className=`feed-item ${sentiment}`;
+    let analysisHtml='';
+    if(u.loading){
+      analysisHtml='<div class="analysing">Analysing…</div>';
+    } else if(u.analysis){
+      const a=u.analysis;
+      let movesHtml='';
+      (a.adjustments||[]).forEach(adj=>{
+        const dir=adj.rankChange<0?'up':adj.rankChange>0?'down':'watch';
+        const label=adj.rankChange<0?`▲${Math.abs(adj.rankChange)} spots`:adj.rankChange>0?`▼${adj.rankChange} spots`:'watch';
+        movesHtml+=`<span class="move-tag ${dir}">${adj.player}: ${label}</span>`;
+      });
+      analysisHtml=`<div class="feed-analysis">${a.summary}${movesHtml?'<br><br>'+movesHtml:''}</div>`;
+    }
+    el.innerHTML=`
+      <div class="feed-top">
+        <span class="feed-ts">${u.ts}</span>
+        <span class="feed-text">${u.text}</span>
+        <span class="feed-del" onclick="removeUpdate(${u.id})">✕</span>
+      </div>${analysisHtml}`;
+    feed.appendChild(el);
+  });
+}
+
+render();
+</script>
+</body>
+</html>
