@@ -125,6 +125,24 @@
     <option value="avail">Hide drafted</option>
   </select>
   <button class="btn" onclick="clearDrafted()">Clear drafted</button>
+  <button class="btn" onclick="openAddPlayer()">+ Add player</button>
+</div>
+
+<div id="addPlayerModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:100;align-items:center;justify-content:center;">
+  <div style="background:#1a1a1a;border:1px solid #2e2e2e;border-radius:12px;padding:24px;width:320px;display:flex;flex-direction:column;gap:12px;">
+    <div style="font-size:14px;font-weight:600;color:#f0f0f0;">Add player</div>
+    <input id="ap_name" placeholder="Name" style="background:#222;border:1px solid #2e2e2e;color:#f0f0f0;border-radius:8px;padding:8px 12px;font-size:13px;outline:none;">
+    <input id="ap_team" placeholder="Team (e.g. CLE)" style="background:#222;border:1px solid #2e2e2e;color:#f0f0f0;border-radius:8px;padding:8px 12px;font-size:13px;outline:none;">
+    <select id="ap_pos" style="background:#222;border:1px solid #2e2e2e;color:#f0f0f0;border-radius:8px;padding:8px 12px;font-size:13px;outline:none;">
+      <option value="WR">WR</option><option value="RB">RB</option><option value="TE">TE</option><option value="QB">QB</option>
+    </select>
+    <input id="ap_tier" placeholder="Tier (1-5)" type="number" min="1" max="5" style="background:#222;border:1px solid #2e2e2e;color:#f0f0f0;border-radius:8px;padding:8px 12px;font-size:13px;outline:none;">
+    <input id="ap_rank" placeholder="Rank (e.g. 41)" type="number" style="background:#222;border:1px solid #2e2e2e;color:#f0f0f0;border-radius:8px;padding:8px 12px;font-size:13px;outline:none;">
+    <div style="display:flex;gap:8px;">
+      <button onclick="confirmAddPlayer()" style="flex:1;background:#222;border:1px solid #2e2e2e;color:#f0f0f0;border-radius:8px;padding:9px;font-size:13px;cursor:pointer;font-weight:500;">Add</button>
+      <button onclick="closeAddPlayer()" style="flex:1;background:transparent;border:1px solid #2e2e2e;color:#888;border-radius:8px;padding:9px;font-size:13px;cursor:pointer;">Cancel</button>
+    </div>
+  </div>
 </div>
 
 <div class="pos-tabs">
@@ -317,13 +335,13 @@ function save(key, val) {
   try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) {}
 }
 
-let curPos       = 'RB';
-let drafted      = load('drafted', {});
-let notes        = load('notes', {});
+let curPos        = 'RB';
+let drafted       = load('drafted', {});
+let notes         = load('notes', {});
 let rankOverrides = load('rankOverrides', {});
 let tierOverrides = load('tierOverrides', {});
 let injOverrides  = load('injOverrides', {});
-let updates      = load('updates', []);
+let updates       = load('updates', []);
 
 function setPos(p, el) {
   curPos = p;
@@ -401,6 +419,25 @@ function saveNote(key, val) { notes[key] = val; save('notes', notes); }
 function toggleDrafted(key) { drafted[key] = !drafted[key]; save('drafted', drafted); render(); }
 function clearDrafted() { drafted = {}; save('drafted', drafted); render(); }
 
+function openAddPlayer() {
+  document.getElementById('addPlayerModal').style.display = 'flex';
+}
+function closeAddPlayer() {
+  document.getElementById('addPlayerModal').style.display = 'none';
+}
+function confirmAddPlayer() {
+  const n    = document.getElementById('ap_name').value.trim();
+  const t    = document.getElementById('ap_team').value.trim().toUpperCase();
+  const pos  = document.getElementById('ap_pos').value;
+  const tier = parseInt(document.getElementById('ap_tier').value) || 5;
+  const rank = parseInt(document.getElementById('ap_rank').value) || (DATA[pos].length + 1);
+  if (!n || !t) return;
+  DATA[pos].push({r: rank, n, t, tier, box: false, inj: false});
+  closeAddPlayer();
+  ['ap_name','ap_team','ap_tier','ap_rank'].forEach(id => document.getElementById(id).value = '');
+  render();
+}
+
 async function addUpdate() {
   const input = document.getElementById('updateInput');
   const text  = input.value.trim();
@@ -424,7 +461,7 @@ The user has added this news update: "${text}"
 
 IMPORTANT CONTEXT FOR SENTIMENT:
 - Phrases like "stocks rising", "stock up", "arrow up", "rising stock", upward arrow emojis (📈 ↑ ⬆), or positive analyst reactions mean POSITIVE sentiment
-- Phrases like "stocks falling", "stock down", "arrow down", downward arrow emojis (📉 ↓ ⬇), injury news, suspension news mean NEGATIVE sentiment  
+- Phrases like "stocks falling", "stock down", "arrow down", downward arrow emojis (📉 ↓ ⬇), injury news, suspension news mean NEGATIVE sentiment
 - Getting more reps, first team reps, snap share increases, target share increases are POSITIVE
 - Losing reps, role changes that reduce opportunity, injury concerns are NEGATIVE
 - Read the full context carefully — a player "lining up with" another star player at the same time can mean POSITIVE opportunity sharing, not negative
@@ -493,29 +530,27 @@ function overrideSentiment(id, sentiment) {
   const entry = updates.find(u => u.id === id);
   if (!entry || !entry.analysis) return;
 
-  // Reverse previous adjustments if there was an override or original sentiment applied
-  const prevSentiment = entry.sentimentOverride || entry.analysis.sentiment;
+  // Undo whatever adjustments are currently applied
+  const prevFlip = (entry.sentimentOverride || entry.analysis.sentiment) === 'positive' ? -1 : 1;
   (entry.analysis.adjustments || []).forEach(adj => {
     const player = DATA[adj.position]?.find(p => p.n === adj.player);
     if (!player) return;
     const key = adj.position + player.r;
-    // Undo the current rank adjustment
-    if (adj.rankChange !== 0) rankOverrides[key] = (rankOverrides[key] || 0) - adj.rankChange;
+    if (adj.rankChange !== 0) rankOverrides[key] = (rankOverrides[key] || 0) - (Math.abs(adj.rankChange) * prevFlip);
   });
 
-  // Toggle off if same button pressed again
   if (entry.sentimentOverride === sentiment) {
+    // Toggling off — leave neutral, no re-apply
     entry.sentimentOverride = null;
-    // Leave adjustments reversed (neutral state)
   } else {
+    // Apply new direction
     entry.sentimentOverride = sentiment;
-    // Flip the adjustments — positive means move players UP, negative means move DOWN
-    const flip = sentiment === 'positive' ? -1 : 1;
+    const newFlip = sentiment === 'positive' ? -1 : 1;
     (entry.analysis.adjustments || []).forEach(adj => {
       const player = DATA[adj.position]?.find(p => p.n === adj.player);
       if (!player) return;
       const key = adj.position + player.r;
-      if (adj.rankChange !== 0) rankOverrides[key] = (rankOverrides[key] || 0) + (Math.abs(adj.rankChange) * flip);
+      if (adj.rankChange !== 0) rankOverrides[key] = (rankOverrides[key] || 0) + (Math.abs(adj.rankChange) * newFlip);
     });
   }
 
@@ -526,9 +561,22 @@ function overrideSentiment(id, sentiment) {
 }
 
 function removeUpdate(id) {
+  const entry = updates.find(u => u.id === id);
+  if (entry && entry.analysis) {
+    // Undo the adjustments this update applied
+    const flip = (entry.sentimentOverride || entry.analysis.sentiment) === 'positive' ? -1 : 1;
+    (entry.analysis.adjustments || []).forEach(adj => {
+      const player = DATA[adj.position]?.find(p => p.n === adj.player);
+      if (!player) return;
+      const key = adj.position + player.r;
+      if (adj.rankChange !== 0) rankOverrides[key] = (rankOverrides[key] || 0) - (Math.abs(adj.rankChange) * flip);
+    });
+    save('rankOverrides', rankOverrides);
+  }
   updates = updates.filter(u => u.id !== id);
   save('updates', updates);
   renderFeed();
+  render();
 }
 
 function renderFeed() {
