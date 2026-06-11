@@ -25,11 +25,9 @@
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; min-height: 100vh; }
-
   header { padding: 16px 20px 12px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; position: sticky; top: 0; background: var(--bg); z-index: 10; }
   header h1 { font-size: 15px; font-weight: 600; letter-spacing: .3px; flex: 1; }
   .draft-badge { font-size: 11px; padding: 3px 10px; border-radius: 20px; background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
-
   .toolbar { display: flex; gap: 8px; padding: 12px 20px; flex-wrap: wrap; align-items: center; border-bottom: 1px solid var(--border); }
   .toolbar input, .toolbar select { background: var(--surface); border: 1px solid var(--border); color: var(--text); border-radius: 8px; padding: 7px 12px; font-size: 13px; outline: none; }
   .toolbar input { flex: 1; min-width: 140px; }
@@ -37,16 +35,13 @@
   .toolbar select option { background: var(--surface); }
   .btn { background: var(--surface); border: 1px solid var(--border); color: var(--muted); border-radius: 8px; padding: 7px 14px; font-size: 13px; cursor: pointer; white-space: nowrap; transition: color .15s, border-color .15s; }
   .btn:hover { color: var(--text); border-color: var(--faint); }
-
   .pos-tabs { display: flex; gap: 0; padding: 0 20px; border-bottom: 1px solid var(--border); }
   .pos-tab { padding: 10px 18px; font-size: 13px; cursor: pointer; color: var(--muted); border-bottom: 2px solid transparent; background: none; border-top: none; border-left: none; border-right: none; transition: color .15s; }
   .pos-tab.active { color: var(--text); border-bottom-color: var(--text); }
   .pos-tab:hover { color: var(--text); }
-
   .legend { display: flex; gap: 16px; padding: 8px 20px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
   .leg { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--muted); }
   .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-
   table { width: 100%; border-collapse: collapse; }
   thead { position: sticky; top: 57px; background: var(--bg); z-index: 5; }
   th { font-size: 11px; font-weight: 500; color: var(--muted); padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--border); letter-spacing: .4px; text-transform: uppercase; }
@@ -54,7 +49,6 @@
   tr.player-row:hover td { background: var(--surface); }
   tr.drafted td { opacity: 0.35; }
   tr.tier-divider td { background: var(--surface); font-size: 10px; font-weight: 600; color: var(--muted); padding: 4px 12px; letter-spacing: 1px; text-transform: uppercase; }
-
   .name-cell { display: flex; align-items: center; gap: 8px; }
   .rank { color: var(--muted); font-size: 12px; min-width: 22px; }
   .tag { display: inline-block; font-size: 10px; padding: 1px 6px; border-radius: 10px; margin-left: 4px; font-weight: 500; }
@@ -69,7 +63,6 @@
   .notes-input:focus { border-bottom-color: var(--faint); }
   .notes-input::placeholder { color: var(--faint); }
   input[type=checkbox] { accent-color: var(--green); width: 14px; height: 14px; cursor: pointer; }
-
   .update-section { padding: 20px; border-top: 1px solid var(--border); }
   .update-section h3 { font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 12px; }
   .update-input-row { display: flex; gap: 8px; margin-bottom: 14px; }
@@ -77,7 +70,6 @@
   .update-input-row input:focus { border-color: var(--faint); }
   .add-btn { background: var(--surface2); border: 1px solid var(--border); color: var(--text); border-radius: 8px; padding: 9px 18px; font-size: 13px; cursor: pointer; font-weight: 500; white-space: nowrap; transition: border-color .15s; }
   .add-btn:hover { border-color: var(--faint); }
-
   .feed { display: flex; flex-direction: column; gap: 8px; }
   .feed-item { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; }
   .feed-item.positive { border-left: 3px solid var(--green); }
@@ -95,7 +87,6 @@
   .move-tag.watch { background: rgba(245,200,66,.15); color: var(--yellow); }
   .analysing { font-size: 12px; color: var(--muted); font-style: italic; margin-top: 8px; }
   .no-feed { font-size: 13px; color: var(--faint); padding: 8px 0; }
-
   @media (max-width: 600px) {
     .toolbar { padding: 10px 12px; }
     td, th { padding: 7px 8px; }
@@ -171,7 +162,6 @@
 
 <script>
 const PROXY = 'https://fantasy-football-coach.cade-vassalllo06.workers.dev/';
-
 const TIER_COLORS = ['','var(--t1)','var(--t2)','var(--t3)','var(--t4)','var(--t5)','var(--t5)'];
 
 const DATA = {
@@ -315,66 +305,81 @@ const DATA = {
   ]
 };
 
-let curPos='RB', drafted={}, notes={}, rankOverrides={}, tierOverrides={}, injOverrides={}, updates=[];
+// localStorage helpers
+function load(key, def) {
+  try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : def; } catch(e) { return def; }
+}
+function save(key, val) {
+  try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) {}
+}
 
-function setPos(p,el){
-  curPos=p;
-  document.querySelectorAll('.pos-tab').forEach(b=>b.classList.remove('active'));
+// State — loaded from localStorage on startup
+let curPos = 'RB';
+let drafted     = load('drafted', {});
+let notes       = load('notes', {});
+let rankOverrides = load('rankOverrides', {});
+let tierOverrides = load('tierOverrides', {});
+let injOverrides  = load('injOverrides', {});
+let updates     = load('updates', []);
+
+function setPos(p, el) {
+  curPos = p;
+  document.querySelectorAll('.pos-tab').forEach(b => b.classList.remove('active'));
   el.classList.add('active');
   render();
 }
 
-function getPlayers(pos){
-  return DATA[pos].map(p=>{
-    const key=pos+p.r;
+function getPlayers(pos) {
+  return DATA[pos].map(p => {
+    const key = pos + p.r;
     return {
       ...p,
-      tier: tierOverrides[key]!==undefined ? tierOverrides[key] : p.tier,
-      inj: injOverrides[key]!==undefined ? injOverrides[key] : p.inj,
+      tier: tierOverrides[key] !== undefined ? tierOverrides[key] : p.tier,
+      inj:  injOverrides[key]  !== undefined ? injOverrides[key]  : p.inj,
     };
-  }).sort((a,b)=>(a.r+(rankOverrides[curPos+a.r]||0))-(b.r+(rankOverrides[curPos+b.r]||0)));
+  }).sort((a, b) => (a.r + (rankOverrides[pos + a.r] || 0)) - (b.r + (rankOverrides[pos + b.r] || 0)));
 }
 
-function render(){
-  const search=document.getElementById('search').value.toLowerCase();
-  const tierF=document.getElementById('tierFilter').value;
-  const flagF=document.getElementById('flagFilter').value;
-  const tbody=document.getElementById('tbody');
-  tbody.innerHTML='';
-  let players=getPlayers(curPos);
-  let lastTier=null, idx=0;
+function render() {
+  const search = document.getElementById('search').value.toLowerCase();
+  const tierF  = document.getElementById('tierFilter').value;
+  const flagF  = document.getElementById('flagFilter').value;
+  const tbody  = document.getElementById('tbody');
+  tbody.innerHTML = '';
+  const players = getPlayers(curPos);
+  let lastTier = null, idx = 0;
 
-  players.forEach(p=>{
-    const key=curPos+p.r;
-    const isDrafted=!!drafted[key];
-    const note=notes[key]||'';
-    const adj=rankOverrides[key]||0;
+  players.forEach(p => {
+    const key       = curPos + p.r;
+    const isDrafted = !!drafted[key];
+    const note      = notes[key] || '';
+    const adj       = rankOverrides[key] || 0;
 
-    if(search && !p.n.toLowerCase().includes(search) && !p.t.toLowerCase().includes(search)) return;
-    if(tierF && String(p.tier)!==tierF) return;
-    if(flagF==='box' && !p.box) return;
-    if(flagF==='inj' && !p.inj) return;
-    if(flagF==='avail' && isDrafted) return;
+    if (search && !p.n.toLowerCase().includes(search) && !p.t.toLowerCase().includes(search)) return;
+    if (tierF && String(p.tier) !== tierF) return;
+    if (flagF === 'box'   && !p.box)      return;
+    if (flagF === 'inj'   && !p.inj)      return;
+    if (flagF === 'avail' && isDrafted)   return;
 
-    if(p.tier!==lastTier){
-      const d=document.createElement('tr');
-      d.className='tier-divider';
-      d.innerHTML=`<td colspan="6">— Tier ${p.tier}</td>`;
+    if (p.tier !== lastTier) {
+      const d = document.createElement('tr');
+      d.className = 'tier-divider';
+      d.innerHTML = `<td colspan="6">— Tier ${p.tier}</td>`;
       tbody.appendChild(d);
-      lastTier=p.tier;
+      lastTier = p.tier;
     }
     idx++;
 
-    const tags=[];
-    if(p.box) tags.push('<span class="tag target">target</span>');
-    if(p.inj) tags.push('<span class="tag flagged">flagged</span>');
-    if(adj<0) tags.push(`<span class="tag up">▲${Math.abs(adj)}</span>`);
-    if(adj>0) tags.push(`<span class="tag down">▼${adj}</span>`);
-    if(isDrafted) tags.push('<span class="tag gone">drafted</span>');
+    const tags = [];
+    if (p.box)    tags.push('<span class="tag target">target</span>');
+    if (p.inj)    tags.push('<span class="tag flagged">flagged</span>');
+    if (adj < 0)  tags.push(`<span class="tag up">▲${Math.abs(adj)}</span>`);
+    if (adj > 0)  tags.push(`<span class="tag down">▼${adj}</span>`);
+    if (isDrafted) tags.push('<span class="tag gone">drafted</span>');
 
-    const tr=document.createElement('tr');
-    tr.className='player-row'+(isDrafted?' drafted':'');
-    tr.innerHTML=`
+    const tr = document.createElement('tr');
+    tr.className = 'player-row' + (isDrafted ? ' drafted' : '');
+    tr.innerHTML = `
       <td class="rank">${idx}</td>
       <td><div class="name-cell">
         <span class="dot" style="background:${TIER_COLORS[p.tier]}"></span>
@@ -382,32 +387,46 @@ function render(){
       </div></td>
       <td class="team">${p.t}</td>
       <td class="tier-num">${p.tier}</td>
-      <td><input class="notes-input" type="text" value="${(note||'').replace(/"/g,'&quot;')}" placeholder="—" onchange="saveNote('${key}',this.value)"></td>
-      <td><input type="checkbox" ${isDrafted?'checked':''} onchange="toggleDrafted('${key}')"></td>
+      <td><input class="notes-input" type="text" value="${(note || '').replace(/"/g, '&quot;')}" placeholder="—" onchange="saveNote('${key}', this.value)"></td>
+      <td><input type="checkbox" ${isDrafted ? 'checked' : ''} onchange="toggleDrafted('${key}')"></td>
     `;
     tbody.appendChild(tr);
   });
 }
 
-function saveNote(key,val){ notes[key]=val; }
-function toggleDrafted(key){ drafted[key]=!drafted[key]; render(); }
-function clearDrafted(){ drafted={}; render(); }
+function saveNote(key, val) {
+  notes[key] = val;
+  save('notes', notes);
+}
 
-async function addUpdate(){
-  const input=document.getElementById('updateInput');
-  const text=input.value.trim();
-  if(!text) return;
-  const ts=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
-  const id=Date.now();
-  updates.unshift({id,text,ts,analysis:null,loading:true});
-  input.value='';
+function toggleDrafted(key) {
+  drafted[key] = !drafted[key];
+  save('drafted', drafted);
+  render();
+}
+
+function clearDrafted() {
+  drafted = {};
+  save('drafted', drafted);
+  render();
+}
+
+async function addUpdate() {
+  const input = document.getElementById('updateInput');
+  const text  = input.value.trim();
+  if (!text) return;
+
+  const ts = new Date().toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
+  const id = Date.now();
+  updates.unshift({id, text, ts, analysis: null, loading: true});
+  input.value = '';
   renderFeed();
 
-  const playerList=Object.entries(DATA).flatMap(([pos,players])=>
-    players.map(p=>`${p.n} (${pos}, ${p.t}, Rank ${p.r}, Tier ${p.tier})`)
+  const playerList = Object.entries(DATA).flatMap(([pos, players]) =>
+    players.map(p => `${p.n} (${pos}, ${p.t}, Rank ${p.r}, Tier ${p.tier})`)
   ).join('\n');
 
-  const prompt=`You are a fantasy football analyst. A user has a 2026 PPR draft board:
+  const prompt = `You are a fantasy football analyst. A user has a 2026 PPR draft board:
 
 ${playerList}
 
@@ -430,72 +449,77 @@ Respond with JSON ONLY (no markdown, no backticks, no extra text):
 }
 Only include players actually affected. rankChange should be 1-5 spots max. Return empty adjustments array if no players identifiable.`;
 
-  try{
-    const res=await fetch(PROXY,{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        model:'claude-sonnet-4-6',
-        max_tokens:1000,
-        messages:[{role:'user',content:prompt}]
+  try {
+    const res = await fetch(PROXY, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1000,
+        messages: [{role: 'user', content: prompt}]
       })
     });
-    const data=await res.json();
-    console.log('API response:', JSON.stringify(data));
-    const raw=data.content?.find(c=>c.type==='text')?.text||'{}';
-    const parsed=JSON.parse(raw.replace(/```json|```/g,'').trim());
+    const data = await res.json();
+    const raw  = data.content?.find(c => c.type === 'text')?.text || '{}';
+    const parsed = JSON.parse(raw.replace(/```json|```/g, '').trim());
 
-    parsed.adjustments?.forEach(adj=>{
-      const pos=adj.position;
-      const player=DATA[pos]?.find(p=>p.n===adj.player);
-      if(!player) return;
-      const key=pos+player.r;
-      if(adj.rankChange!==0) rankOverrides[key]=(rankOverrides[key]||0)+adj.rankChange;
-      if(adj.tierChange!==0){
-        const base=tierOverrides[key]!==undefined?tierOverrides[key]:player.tier;
-        tierOverrides[key]=Math.max(1,Math.min(6,base+adj.tierChange));
+    parsed.adjustments?.forEach(adj => {
+      const pos    = adj.position;
+      const player = DATA[pos]?.find(p => p.n === adj.player);
+      if (!player) return;
+      const key = pos + player.r;
+      if (adj.rankChange !== 0) rankOverrides[key] = (rankOverrides[key] || 0) + adj.rankChange;
+      if (adj.tierChange !== 0) {
+        const base = tierOverrides[key] !== undefined ? tierOverrides[key] : player.tier;
+        tierOverrides[key] = Math.max(1, Math.min(6, base + adj.tierChange));
       }
-      if(adj.flagged) injOverrides[key]=true;
+      if (adj.flagged) injOverrides[key] = true;
     });
 
-    const entry=updates.find(u=>u.id===id);
-    if(entry){entry.analysis=parsed;entry.loading=false;}
-  } catch(e){
-    const entry=updates.find(u=>u.id===id);
-    if(entry){entry.analysis={sentiment:'neutral',summary:'Error: '+e.message,adjustments:[]};entry.loading=false;}
+    const entry = updates.find(u => u.id === id);
+    if (entry) { entry.analysis = parsed; entry.loading = false; }
+
+  } catch(e) {
+    const entry = updates.find(u => u.id === id);
+    if (entry) { entry.analysis = {sentiment: 'neutral', summary: 'Error: ' + e.message, adjustments: []}; entry.loading = false; }
   }
 
   renderFeed();
   render();
+  save('updates', updates);
+  save('rankOverrides', rankOverrides);
+  save('tierOverrides', tierOverrides);
+  save('injOverrides', injOverrides);
 }
 
-function removeUpdate(id){
-  updates=updates.filter(u=>u.id!==id);
+function removeUpdate(id) {
+  updates = updates.filter(u => u.id !== id);
+  save('updates', updates);
   renderFeed();
 }
 
-function renderFeed(){
-  const feed=document.getElementById('feed');
-  if(!updates.length){feed.innerHTML='<div class="no-feed">No updates yet.</div>';return;}
-  feed.innerHTML='';
-  updates.forEach(u=>{
-    const sentiment=u.analysis?.sentiment||'neutral';
-    const el=document.createElement('div');
-    el.className=`feed-item ${sentiment}`;
-    let analysisHtml='';
-    if(u.loading){
-      analysisHtml='<div class="analysing">Analysing…</div>';
-    } else if(u.analysis){
-      const a=u.analysis;
-      let movesHtml='';
-      (a.adjustments||[]).forEach(adj=>{
-        const dir=adj.rankChange<0?'up':adj.rankChange>0?'down':'watch';
-        const label=adj.rankChange<0?`▲${Math.abs(adj.rankChange)} spots`:adj.rankChange>0?`▼${adj.rankChange} spots`:'watch';
-        movesHtml+=`<span class="move-tag ${dir}">${adj.player}: ${label}</span>`;
+function renderFeed() {
+  const feed = document.getElementById('feed');
+  if (!updates.length) { feed.innerHTML = '<div class="no-feed">No updates yet.</div>'; return; }
+  feed.innerHTML = '';
+  updates.forEach(u => {
+    const sentiment = u.analysis?.sentiment || 'neutral';
+    const el = document.createElement('div');
+    el.className = `feed-item ${sentiment}`;
+    let analysisHtml = '';
+    if (u.loading) {
+      analysisHtml = '<div class="analysing">Analysing…</div>';
+    } else if (u.analysis) {
+      const a = u.analysis;
+      let movesHtml = '';
+      (a.adjustments || []).forEach(adj => {
+        const dir   = adj.rankChange < 0 ? 'up' : adj.rankChange > 0 ? 'down' : 'watch';
+        const label = adj.rankChange < 0 ? `▲${Math.abs(adj.rankChange)} spots` : adj.rankChange > 0 ? `▼${adj.rankChange} spots` : 'watch';
+        movesHtml += `<span class="move-tag ${dir}">${adj.player}: ${label}</span>`;
       });
-      analysisHtml=`<div class="feed-analysis">${a.summary}${movesHtml?'<br><br>'+movesHtml:''}</div>`;
+      analysisHtml = `<div class="feed-analysis">${a.summary}${movesHtml ? '<br><br>' + movesHtml : ''}</div>`;
     }
-    el.innerHTML=`
+    el.innerHTML = `
       <div class="feed-top">
         <span class="feed-ts">${u.ts}</span>
         <span class="feed-text">${u.text}</span>
@@ -506,6 +530,7 @@ function renderFeed(){
 }
 
 render();
+renderFeed();
 </script>
 </body>
 </html>
