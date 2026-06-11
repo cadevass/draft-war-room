@@ -445,7 +445,7 @@ async function addUpdate() {
 
   const ts = new Date().toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
   const id = Date.now();
-  updates.unshift({id, text, ts, analysis: null, loading: true, sentimentOverride: null});
+  updates.unshift({id, text, ts, analysis: null, loading: true, sentimentOverride: null, snapshot: JSON.parse(JSON.stringify(rankOverrides))});
   input.value = '';
   renderFeed();
 
@@ -530,28 +530,20 @@ function overrideSentiment(id, sentiment) {
   const entry = updates.find(u => u.id === id);
   if (!entry || !entry.analysis) return;
 
-  // Undo whatever adjustments are currently applied
-  const prevFlip = (entry.sentimentOverride || entry.analysis.sentiment) === 'positive' ? -1 : 1;
-  (entry.analysis.adjustments || []).forEach(adj => {
-    const player = DATA[adj.position]?.find(p => p.n === adj.player);
-    if (!player) return;
-    const key = adj.position + player.r;
-    if (adj.rankChange !== 0) rankOverrides[key] = (rankOverrides[key] || 0) - (Math.abs(adj.rankChange) * prevFlip);
-  });
+  // Restore snapshot first, then re-apply all other updates in order
+  rankOverrides = JSON.parse(JSON.stringify(entry.snapshot));
 
-  if (entry.sentimentOverride === sentiment) {
-    // Toggling off — leave neutral, no re-apply
-    entry.sentimentOverride = null;
-  } else {
-    // Apply new direction
+  if (entry.sentimentOverride !== sentiment) {
     entry.sentimentOverride = sentiment;
-    const newFlip = sentiment === 'positive' ? -1 : 1;
+    const flip = sentiment === 'positive' ? -1 : 1;
     (entry.analysis.adjustments || []).forEach(adj => {
       const player = DATA[adj.position]?.find(p => p.n === adj.player);
       if (!player) return;
       const key = adj.position + player.r;
-      if (adj.rankChange !== 0) rankOverrides[key] = (rankOverrides[key] || 0) + (Math.abs(adj.rankChange) * newFlip);
+      if (adj.rankChange !== 0) rankOverrides[key] = (rankOverrides[key] || 0) + (Math.abs(adj.rankChange) * flip);
     });
+  } else {
+    entry.sentimentOverride = null;
   }
 
   save('updates', updates);
@@ -562,15 +554,8 @@ function overrideSentiment(id, sentiment) {
 
 function removeUpdate(id) {
   const entry = updates.find(u => u.id === id);
-  if (entry && entry.analysis) {
-    // Undo the adjustments this update applied
-    const flip = (entry.sentimentOverride || entry.analysis.sentiment) === 'positive' ? -1 : 1;
-    (entry.analysis.adjustments || []).forEach(adj => {
-      const player = DATA[adj.position]?.find(p => p.n === adj.player);
-      if (!player) return;
-      const key = adj.position + player.r;
-      if (adj.rankChange !== 0) rankOverrides[key] = (rankOverrides[key] || 0) - (Math.abs(adj.rankChange) * flip);
-    });
+  if (entry && entry.snapshot) {
+    rankOverrides = JSON.parse(JSON.stringify(entry.snapshot));
     save('rankOverrides', rankOverrides);
   }
   updates = updates.filter(u => u.id !== id);
