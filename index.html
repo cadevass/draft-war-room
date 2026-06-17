@@ -382,7 +382,7 @@ function render() {
     if (flagF === 'inj'   && !p.inj)    return;
     if (flagF === 'avail' && isDrafted) return;
 
-    if (p.tier !== lastTier) {
+    if (p.tier !== lastTier && p.tier > (lastTier || 0)) {
       const d = document.createElement('tr');
       d.className = 'tier-divider';
       d.innerHTML = `<td colspan="6">— Tier ${p.tier}</td>`;
