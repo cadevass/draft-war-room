@@ -407,7 +407,7 @@ function render() {
         ${p.n}${tags.join('')}
       </div></td>
       <td class="team">${p.t}</td>
-      <td class="tier-num">${p.tier}</td>
+      <td class="tier-num">${lastTier}</td>
       <td><input class="notes-input" type="text" value="${(note || '').replace(/"/g, '&quot;')}" placeholder="—" onchange="saveNote('${key}', this.value)"></td>
       <td><input type="checkbox" ${isDrafted ? 'checked' : ''} onchange="toggleDrafted('${key}')"></td>
     `;
