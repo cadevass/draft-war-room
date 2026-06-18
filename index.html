@@ -402,6 +402,13 @@ function save(key, val) {
   try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) {}
 }
 
+const savedCustom = load('customPlayers', null);
+if (savedCustom) {
+  Object.entries(savedCustom).forEach(([pos, players]) => {
+    DATA[pos].push(...players);
+  });
+} 
+
 let curPos        = 'RB';
 let drafted       = load('drafted', {});       // key -> 'me' | 'other'
 let notes         = load('notes', {});
@@ -698,9 +705,20 @@ function confirmAddPlayer() {
   const rank = parseInt(document.getElementById('ap_rank').value) || (DATA[pos].length + 1);
   if (!n || !t) return;
   DATA[pos].push({r: rank, n, t, tier, box: false, inj: false});
+  save('customPlayers', getCustomPlayers());
   closeAddPlayer();
   ['ap_name','ap_team','ap_tier','ap_rank'].forEach(id => document.getElementById(id).value = '');
   render();
+}
+
+function getCustomPlayers() {
+  // Tracks which players were manually added beyond the original counts
+  return {
+    RB: DATA.RB.slice(40),
+    WR: DATA.WR.slice(40),
+    TE: DATA.TE.slice(25),
+    QB: DATA.QB.slice(25),
+  };
 }
 
 async function addUpdate() {
