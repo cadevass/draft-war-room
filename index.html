@@ -573,12 +573,18 @@ function renderSuggestions() {
   // Score: lower tier number = better, lower effective rank = better, positional need boosts score
   const scored = allAvailable.map(p => {
     let needBoost = 0;
+    let surplusPenalty = 0;
+
     if (p.pos === 'RB' && counts.RB < 2) needBoost = 3;
     else if (p.pos === 'WR' && counts.WR < 2) needBoost = 2;
     else if (p.pos === 'TE' && counts.TE < 1) needBoost = 1.5;
     else if (p.pos === 'QB' && counts.QB < 1) needBoost = 1;
 
-    const score = (p.tier * 10) + (p.r * 0.1) - needBoost - (p.box ? 2 : 0);
+    // Once starter slot is filled, deprioritize unless it's elite value (Tier 1)
+    if (p.pos === 'QB' && counts.QB >= 1 && p.tier > 1) surplusPenalty = 4;
+    if (p.pos === 'TE' && counts.TE >= 1 && p.tier > 1) surplusPenalty = 4;
+
+    const score = (p.tier * 10) + (p.r * 0.1) - needBoost - (p.box ? 2 : 0) + surplusPenalty;
     return {...p, score};
   });
 
