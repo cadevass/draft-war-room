@@ -581,8 +581,8 @@ function renderSuggestions() {
     else if (p.pos === 'QB' && counts.QB < 1) needBoost = 1;
 
     // Once starter slot is filled, deprioritize unless it's elite value (Tier 1)
-    if (p.pos === 'QB' && counts.QB >= 1 && p.tier > 1) surplusPenalty = 4;
-    if (p.pos === 'TE' && counts.TE >= 1 && p.tier > 1) surplusPenalty = 4;
+    if (p.pos === 'QB' && counts.QB >= 1) surplusPenalty = p.tier > 1 ? 25 : 4;
+    if (p.pos === 'TE' && counts.TE >= 1) surplusPenalty = p.tier > 1 ? 25 : 4;
 
     const score = (p.tier * 10) + (p.r * 0.1) - needBoost - (p.box ? 2 : 0) + surplusPenalty;
     return {...p, score};
