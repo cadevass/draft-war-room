@@ -708,7 +708,7 @@ function confirmAddPlayer() {
   const t    = document.getElementById('ap_team').value.trim().toUpperCase();
   const pos  = document.getElementById('ap_pos').value;
   const tier = parseInt(document.getElementById('ap_tier').value) || 5;
-  const rank = parseInt(document.getElementById('ap_rank').value) || (DATA[pos].length + 1);
+  const rank = parseInt(document.getElementById('ap_rank').value) || (DATA[pos].length + 101);
   if (!n || !t) return;
   DATA[pos].push({r: rank, n, t, tier, box: false, inj: false});
   save('customPlayers', getCustomPlayers());
