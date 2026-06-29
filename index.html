@@ -28,19 +28,16 @@
   header { padding: 16px 20px 12px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; position: sticky; top: 0; background: var(--bg); z-index: 10; flex-wrap: wrap; }
   header h1 { font-size: 15px; font-weight: 600; letter-spacing: .3px; flex: 1; min-width: 140px; }
   .draft-badge { font-size: 11px; padding: 3px 10px; border-radius: 20px; background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
-
   .pick-tracker { display: flex; align-items: center; gap: 10px; padding: 10px 20px; border-bottom: 1px solid var(--border); background: var(--surface); flex-wrap: wrap; }
   .pick-tracker .pt-item { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
   .pick-tracker .pt-num { font-size: 14px; font-weight: 600; color: var(--text); }
   .pick-tracker .pt-next { color: var(--yellow); font-weight: 600; }
   .pick-tracker input[type=number] { width: 50px; background: var(--surface2); border: 1px solid var(--border); color: var(--text); border-radius: 6px; padding: 4px 6px; font-size: 12px; }
   .pt-divider { width: 1px; height: 16px; background: var(--border); }
-
   .scarcity-bar { display: flex; gap: 10px; padding: 8px 20px; border-bottom: 1px solid var(--border); overflow-x: auto; }
   .scarcity-chip { font-size: 11px; padding: 4px 10px; border-radius: 14px; background: var(--surface); border: 1px solid var(--border); color: var(--muted); white-space: nowrap; display: flex; align-items: center; gap: 5px; }
   .scarcity-chip.low { color: var(--red); border-color: rgba(224,85,85,.3); background: rgba(224,85,85,.08); }
   .scarcity-chip.med { color: var(--yellow); border-color: rgba(245,200,66,.3); background: rgba(245,200,66,.08); }
-
   .suggestion-box { padding: 14px 20px; border-bottom: 1px solid var(--border); background: linear-gradient(180deg, rgba(143,207,106,.04), transparent); }
   .suggestion-box h3 { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px; }
   .suggestion-list { display: flex; flex-direction: column; gap: 6px; }
@@ -54,7 +51,6 @@
   .suggestion-pos-tag.TE { background: rgba(143,207,106,.15); color: var(--t3); }
   .suggestion-pos-tag.QB { background: rgba(245,200,66,.15); color: var(--t4); }
   .no-suggestion { font-size: 12px; color: var(--faint); }
-
   .roster-section { padding: 14px 20px; border-bottom: 1px solid var(--border); }
   .roster-section h3 { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
   .roster-grid { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -62,7 +58,6 @@
   .roster-slot.filled { color: var(--text); border-color: var(--faint); }
   .roster-need { color: var(--yellow); }
   .roster-empty { font-size: 12px; color: var(--faint); padding: 4px 0; }
-
   .toolbar { display: flex; gap: 8px; padding: 12px 20px; flex-wrap: wrap; align-items: center; border-bottom: 1px solid var(--border); }
   .toolbar input, .toolbar select { background: var(--surface); border: 1px solid var(--border); color: var(--text); border-radius: 8px; padding: 7px 12px; font-size: 13px; outline: none; }
   .toolbar input { flex: 1; min-width: 140px; }
@@ -107,7 +102,6 @@
   .draft-actions button:hover { border-color: var(--faint); }
   .draft-actions button.active-me { background: rgba(143,207,106,.15); border-color: rgba(143,207,106,.3); color: var(--green); }
   .draft-actions button.active-other { background: rgba(224,85,85,.15); border-color: rgba(224,85,85,.3); color: var(--red); }
-
   .update-section { padding: 20px; border-top: 1px solid var(--border); }
   .update-section h3 { font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 12px; }
   .update-input-row { display: flex; gap: 8px; margin-bottom: 14px; }
@@ -146,12 +140,10 @@
 </style>
 </head>
 <body>
-
 <header>
   <h1>2026 Draft War Room</h1>
   <span class="draft-badge">PPR</span>
 </header>
-
 <div class="pick-tracker">
   <div class="pt-item">Teams: <input type="number" id="numTeams" value="10" min="4" max="20" onchange="updatePickSettings()"></div>
   <div class="pt-item">My slot: <input type="number" id="mySlot" value="8" min="1" max="20" onchange="updatePickSettings()"></div>
@@ -161,19 +153,15 @@
   <div class="pt-divider"></div>
   <div class="pt-item pt-next" id="nextPickInfo">Your pick now</div>
 </div>
-
 <div class="scarcity-bar" id="scarcityBar"></div>
-
 <div class="suggestion-box">
   <h3>Best available right now</h3>
   <div class="suggestion-list" id="suggestionList"></div>
 </div>
-
 <div class="roster-section">
   <h3>My roster <span id="rosterCount" style="color:var(--muted);font-weight:400;"></span></h3>
   <div class="roster-grid" id="rosterGrid"></div>
 </div>
-
 <div class="toolbar">
   <input type="text" id="search" placeholder="Search player or team…" oninput="render()">
   <select id="tierFilter" onchange="render()">
@@ -194,7 +182,6 @@
   <button class="btn" onclick="clearDrafted()">Clear drafted</button>
   <button class="btn" onclick="openAddPlayer()">+ Add player</button>
 </div>
-
 <div id="addPlayerModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:100;align-items:center;justify-content:center;">
   <div style="background:#1a1a1a;border:1px solid #2e2e2e;border-radius:12px;padding:24px;width:320px;display:flex;flex-direction:column;gap:12px;">
     <div style="font-size:14px;font-weight:600;color:#f0f0f0;">Add player</div>
@@ -204,21 +191,19 @@
       <option value="WR">WR</option><option value="RB">RB</option><option value="TE">TE</option><option value="QB">QB</option>
     </select>
     <input id="ap_tier" placeholder="Tier (1-5)" type="number" min="1" max="5" style="background:#222;border:1px solid #2e2e2e;color:#f0f0f0;border-radius:8px;padding:8px 12px;font-size:13px;outline:none;">
-    <input id="ap_rank" placeholder="Rank (e.g. 41)" type="number" style="background:#222;border:1px solid #2e2e2e;color:#f0f0f0;border-radius:8px;padding:8px 12px;font-size:13px;outline:none;">
+    <input id="ap_rank" placeholder="Rank (optional — leave blank for auto)" type="number" style="background:#222;border:1px solid #2e2e2e;color:#f0f0f0;border-radius:8px;padding:8px 12px;font-size:13px;outline:none;">
     <div style="display:flex;gap:8px;">
       <button onclick="confirmAddPlayer()" style="flex:1;background:#222;border:1px solid #2e2e2e;color:#f0f0f0;border-radius:8px;padding:9px;font-size:13px;cursor:pointer;font-weight:500;">Add</button>
       <button onclick="closeAddPlayer()" style="flex:1;background:transparent;border:1px solid #2e2e2e;color:#888;border-radius:8px;padding:9px;font-size:13px;cursor:pointer;">Cancel</button>
     </div>
   </div>
 </div>
-
 <div class="pos-tabs">
   <button class="pos-tab active" onclick="setPos('RB',this)">RB</button>
   <button class="pos-tab" onclick="setPos('WR',this)">WR</button>
   <button class="pos-tab" onclick="setPos('TE',this)">TE</button>
   <button class="pos-tab" onclick="setPos('QB',this)">QB</button>
 </div>
-
 <div class="legend">
   <div class="leg"><span class="dot" style="background:var(--t1)"></span>Tier 1</div>
   <div class="leg"><span class="dot" style="background:var(--t2)"></span>Tier 2</div>
@@ -226,7 +211,6 @@
   <div class="leg"><span class="dot" style="background:var(--t4)"></span>Tier 4</div>
   <div class="leg"><span class="dot" style="background:var(--t5)"></span>Tier 5</div>
 </div>
-
 <table>
   <thead>
     <tr>
@@ -240,7 +224,6 @@
   </thead>
   <tbody id="tbody"></tbody>
 </table>
-
 <div class="update-section">
   <h3>News & Updates</h3>
   <div class="update-input-row">
@@ -249,7 +232,6 @@
   </div>
   <div class="feed" id="feed"><div class="no-feed">No updates yet.</div></div>
 </div>
-
 <script>
 const PROXY = 'https://fantasy-football-coach.cade-vassalllo06.workers.dev/';
 const TIER_COLORS = ['','var(--t1)','var(--t2)','var(--t3)','var(--t4)','var(--t5)','var(--t5)'];
@@ -407,10 +389,10 @@ if (savedCustom) {
   Object.entries(savedCustom).forEach(([pos, players]) => {
     DATA[pos].push(...players);
   });
-} 
+}
 
 let curPos        = 'RB';
-let drafted       = load('drafted', {});       // key -> 'me' | 'other'
+let drafted       = load('drafted', {});
 let notes         = load('notes', {});
 let rankOverrides = load('rankOverrides', {});
 let tierOverrides = load('tierOverrides', {});
@@ -446,8 +428,6 @@ function getAllPlayersFlat() {
   );
 }
 
-// ---------- Draft / Pick tracking ----------
-
 function totalDraftedCount() {
   return Object.keys(drafted).length;
 }
@@ -461,7 +441,6 @@ function updatePickSettings() {
 }
 
 function getMyPickNumbers(maxPick) {
-  // Snake draft: round 1 = mySlot, round 2 = (numTeams - mySlot + 1), etc.
   const picks = [];
   let round = 1;
   while (picks.length === 0 || picks[picks.length-1] <= maxPick) {
@@ -480,20 +459,12 @@ function renderPickTracker() {
   const round = Math.floor((overallPick - 1) / numTeams) + 1;
   document.getElementById('overallPick').textContent = overallPick;
   document.getElementById('curRound').textContent = round;
-
   const myPicks = getMyPickNumbers(overallPick + numTeams * 2);
   const nextMyPick = myPicks.find(p => p >= overallPick);
   const picksAway = nextMyPick - overallPick;
-
   const info = document.getElementById('nextPickInfo');
-  if (picksAway === 0) {
-    info.textContent = "Your pick now";
-  } else {
-    info.textContent = `Your pick in ${picksAway} pick${picksAway === 1 ? '' : 's'}`;
-  }
+  info.textContent = picksAway === 0 ? 'Your pick now' : `Your pick in ${picksAway} pick${picksAway === 1 ? '' : 's'}`;
 }
-
-// ---------- Scarcity ----------
 
 function renderScarcity() {
   const bar = document.getElementById('scarcityBar');
@@ -518,10 +489,6 @@ function renderScarcity() {
   if (!bar.innerHTML) bar.innerHTML = '<div class="scarcity-chip">No scarcity alerts yet</div>';
 }
 
-// ---------- Roster ----------
-
-const ROSTER_SLOTS = ['QB','RB','RB','WR','WR','TE','FLEX','FLEX','BENCH','BENCH','BENCH','BENCH','BENCH','BENCH'];
-
 function getMyRoster() {
   return getAllPlayersFlat().filter(p => drafted[p.key] === 'me');
 }
@@ -531,23 +498,18 @@ function renderRoster() {
   document.getElementById('rosterCount').textContent = `(${myTeam.length} drafted)`;
   const grid = document.getElementById('rosterGrid');
   grid.innerHTML = '';
-
   if (myTeam.length === 0) {
     grid.innerHTML = '<div class="roster-empty">No players drafted yet. Mark players "Me" as you draft them.</div>';
     return;
   }
-
   const counts = {RB:0, WR:0, TE:0, QB:0};
   myTeam.forEach(p => counts[p.pos] = (counts[p.pos]||0) + 1);
-
   Object.entries(counts).forEach(([pos, count]) => {
     const slot = document.createElement('div');
     slot.className = 'roster-slot filled';
     slot.textContent = `${pos}: ${count}`;
     grid.appendChild(slot);
   });
-
-  // Flag needs
   const needs = [];
   if (counts.RB < 2) needs.push('RB');
   if (counts.WR < 2) needs.push('WR');
@@ -561,50 +523,37 @@ function renderRoster() {
   }
 }
 
-// ---------- Best Available Suggestion ----------
-
 function renderSuggestions() {
   const myTeam = getMyRoster();
   const counts = {RB:0, WR:0, TE:0, QB:0};
   myTeam.forEach(p => counts[p.pos] = (counts[p.pos]||0) + 1);
-
   const allAvailable = getAllPlayersFlat().filter(p => drafted[p.key] === undefined);
-
-  // Score: lower tier number = better, lower effective rank = better, positional need boosts score
   const scored = allAvailable.map(p => {
     let needBoost = 0;
     let surplusPenalty = 0;
-
     if (p.pos === 'RB' && counts.RB < 2) needBoost = 3;
     else if (p.pos === 'WR' && counts.WR < 2) needBoost = 2;
     else if (p.pos === 'TE' && counts.TE < 1) needBoost = 1.5;
     else if (p.pos === 'QB' && counts.QB < 1) needBoost = 1;
-
-    // Once starter slot is filled, deprioritize unless it's elite value (Tier 1)
     if (p.pos === 'QB' && counts.QB >= 1) surplusPenalty = p.tier > 1 ? 25 : 4;
     if (p.pos === 'TE' && counts.TE >= 1) surplusPenalty = p.tier > 1 ? 25 : 4;
-
     const score = (p.tier * 10) + (p.r * 0.1) - needBoost - (p.box ? 2 : 0) + surplusPenalty;
     return {...p, score};
   });
-
   scored.sort((a, b) => a.score - b.score);
   const top3 = scored.slice(0, 3);
-
   const list = document.getElementById('suggestionList');
   list.innerHTML = '';
   if (top3.length === 0) {
-    list.innerHTML = '<div class="no-suggestion">No players available — check filters or drafted list.</div>';
+    list.innerHTML = '<div class="no-suggestion">No players available.</div>';
     return;
   }
-
   top3.forEach((p, i) => {
     let reason = `Tier ${p.tier}`;
     if (p.box) reason += ' · target';
     if (p.pos === 'RB' && counts.RB < 2) reason += ' · fills RB need';
     if (p.pos === 'WR' && counts.WR < 2) reason += ' · fills WR need';
     if (p.pos === 'TE' && counts.TE < 1) reason += ' · fills TE need';
-
     const item = document.createElement('div');
     item.className = 'suggestion-item';
     item.innerHTML = `
@@ -617,23 +566,24 @@ function renderSuggestions() {
   });
 }
 
-// ---------- Main render ----------
-
 function render() {
   const search = document.getElementById('search').value.toLowerCase();
   const tierF  = document.getElementById('tierFilter').value;
   const flagF  = document.getElementById('flagFilter').value;
   const tbody  = document.getElementById('tbody');
   tbody.innerHTML = '';
-  const players = getPlayers(curPos);
-  let lastTier = null, idx = 0;
+
+  // Get full sorted list for accurate rank numbering
+  const allSorted = getPlayers(curPos);
+  const players = allSorted;
+  let lastTier = null;
 
   players.forEach(p => {
-    const key       = curPos + p.r;
-    const draftState = drafted[key]; // undefined | 'me' | 'other'
-    const isDrafted = draftState !== undefined;
-    const note      = notes[key] || '';
-    const adj       = rankOverrides[key] || 0;
+    const key        = curPos + p.r;
+    const draftState = drafted[key];
+    const isDrafted  = draftState !== undefined;
+    const note       = notes[key] || '';
+    const adj        = rankOverrides[key] || 0;
 
     if (search && !p.n.toLowerCase().includes(search) && !p.t.toLowerCase().includes(search)) return;
     if (tierF && String(p.tier) !== tierF) return;
@@ -648,7 +598,9 @@ function render() {
       tbody.appendChild(d);
       lastTier = p.tier;
     }
-    idx++;
+
+    // True rank = position in the fully sorted array (1-based)
+    const trueRank = allSorted.findIndex(sp => sp.r === p.r) + 1;
 
     const tags = [];
     if (p.box)     tags.push('<span class="tag target">target</span>');
@@ -661,7 +613,7 @@ function render() {
     const tr = document.createElement('tr');
     tr.className = 'player-row' + (draftState === 'other' ? ' drafted' : '') + (draftState === 'me' ? ' drafted-me' : '');
     tr.innerHTML = `
-      <td class="rank">${idx}</td>
+      <td class="rank">${trueRank}</td>
       <td><div class="name-cell">
         <span class="dot" style="background:${TIER_COLORS[lastTier]}"></span>
         ${p.n}${tags.join('')}
@@ -686,23 +638,15 @@ function render() {
 function saveNote(key, val) { notes[key] = val; save('notes', notes); }
 
 function setDraftState(key, who) {
-  if (drafted[key] === who) {
-    delete drafted[key]; // toggle off
-  } else {
-    drafted[key] = who;
-  }
+  if (drafted[key] === who) { delete drafted[key]; } else { drafted[key] = who; }
   save('drafted', drafted);
   render();
 }
 
 function clearDrafted() { drafted = {}; save('drafted', drafted); render(); }
 
-function openAddPlayer() {
-  document.getElementById('addPlayerModal').style.display = 'flex';
-}
-function closeAddPlayer() {
-  document.getElementById('addPlayerModal').style.display = 'none';
-}
+function openAddPlayer() { document.getElementById('addPlayerModal').style.display = 'flex'; }
+function closeAddPlayer() { document.getElementById('addPlayerModal').style.display = 'none'; }
 function confirmAddPlayer() {
   const n    = document.getElementById('ap_name').value.trim();
   const t    = document.getElementById('ap_team').value.trim().toUpperCase();
@@ -716,9 +660,7 @@ function confirmAddPlayer() {
   ['ap_name','ap_team','ap_tier','ap_rank'].forEach(id => document.getElementById(id).value = '');
   render();
 }
-
 function getCustomPlayers() {
-  // Tracks which players were manually added beyond the original counts
   return {
     RB: DATA.RB.slice(40),
     WR: DATA.WR.slice(40),
@@ -731,7 +673,6 @@ async function addUpdate() {
   const input = document.getElementById('updateInput');
   const text  = input.value.trim();
   if (!text) return;
-
   const ts = new Date().toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
   const id = Date.now();
   updates.unshift({id, text, ts, analysis: null, loading: true, sentimentOverride: null, snapshot: JSON.parse(JSON.stringify(rankOverrides))});
@@ -776,16 +717,11 @@ Only include players actually affected. rankChange should be 1-5 spots max. Retu
     const res = await fetch(PROXY, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 1000,
-        messages: [{role: 'user', content: prompt}]
-      })
+      body: JSON.stringify({model: 'claude-sonnet-4-6', max_tokens: 1000, messages: [{role: 'user', content: prompt}]})
     });
     const data   = await res.json();
     const raw    = data.content?.find(c => c.type === 'text')?.text || '{}';
     const parsed = JSON.parse(raw.replace(/```json|```/g, '').trim());
-
     parsed.adjustments?.forEach(adj => {
       const pos    = adj.position;
       const player = DATA[pos]?.find(p => p.n === adj.player);
@@ -798,10 +734,8 @@ Only include players actually affected. rankChange should be 1-5 spots max. Retu
       }
       if (adj.flagged) injOverrides[key] = true;
     });
-
     const entry = updates.find(u => u.id === id);
     if (entry) { entry.analysis = parsed; entry.loading = false; }
-
   } catch(e) {
     const entry = updates.find(u => u.id === id);
     if (entry) { entry.analysis = {sentiment: 'neutral', summary: 'Error: ' + e.message, adjustments: []}; entry.loading = false; }
@@ -818,9 +752,7 @@ Only include players actually affected. rankChange should be 1-5 spots max. Retu
 function overrideSentiment(id, sentiment) {
   const entry = updates.find(u => u.id === id);
   if (!entry || !entry.analysis) return;
-
   rankOverrides = JSON.parse(JSON.stringify(entry.snapshot));
-
   if (entry.sentimentOverride !== sentiment) {
     entry.sentimentOverride = sentiment;
     const flip = sentiment === 'positive' ? -1 : 1;
@@ -833,7 +765,6 @@ function overrideSentiment(id, sentiment) {
   } else {
     entry.sentimentOverride = null;
   }
-
   save('updates', updates);
   save('rankOverrides', rankOverrides);
   renderFeed();
@@ -860,7 +791,6 @@ function renderFeed() {
     const effectiveSentiment = u.sentimentOverride || u.analysis?.sentiment || 'neutral';
     const el = document.createElement('div');
     el.className = `feed-item ${effectiveSentiment}`;
-
     let analysisHtml = '';
     if (u.loading) {
       analysisHtml = '<div class="analysing">Analysing…</div>';
@@ -874,10 +804,8 @@ function renderFeed() {
       });
       analysisHtml = `<div class="feed-analysis">${a.summary}${movesHtml ? '<br><br>' + movesHtml : ''}</div>`;
     }
-
     const posActive = u.sentimentOverride === 'positive' ? 'active-pos' : '';
     const negActive = u.sentimentOverride === 'negative' ? 'active-neg' : '';
-
     el.innerHTML = `
       <div class="feed-top">
         <span class="feed-ts">${u.ts}</span>
