@@ -600,7 +600,7 @@ function render() {
     }
 
     // True rank = position in the fully sorted array (1-based)
-    const trueRank = allSorted.findIndex(sp => sp.r === p.r) + 1;
+    const trueRank = allSorted.findIndex(sp => sp.r === p.r && sp.n === p.n) + 1;
 
     const tags = [];
     if (p.box)     tags.push('<span class="tag target">target</span>');
