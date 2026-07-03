@@ -25,6 +25,7 @@
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; min-height: 100vh; }
+  #loading { display: flex; align-items: center; justify-content: center; height: 100vh; font-size: 13px; color: var(--muted); }
   header { padding: 16px 20px 12px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; position: sticky; top: 0; background: var(--bg); z-index: 10; flex-wrap: wrap; }
   header h1 { font-size: 15px; font-weight: 600; letter-spacing: .3px; flex: 1; min-width: 140px; }
   .draft-badge { font-size: 11px; padding: 3px 10px; border-radius: 20px; background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
@@ -35,7 +36,7 @@
   .pick-tracker input[type=number] { width: 50px; background: var(--surface2); border: 1px solid var(--border); color: var(--text); border-radius: 6px; padding: 4px 6px; font-size: 12px; }
   .pt-divider { width: 1px; height: 16px; background: var(--border); }
   .scarcity-bar { display: flex; gap: 10px; padding: 8px 20px; border-bottom: 1px solid var(--border); overflow-x: auto; }
-  .scarcity-chip { font-size: 11px; padding: 4px 10px; border-radius: 14px; background: var(--surface); border: 1px solid var(--border); color: var(--muted); white-space: nowrap; display: flex; align-items: center; gap: 5px; }
+  .scarcity-chip { font-size: 11px; padding: 4px 10px; border-radius: 14px; background: var(--surface); border: 1px solid var(--border); color: var(--muted); white-space: nowrap; }
   .scarcity-chip.low { color: var(--red); border-color: rgba(224,85,85,.3); background: rgba(224,85,85,.08); }
   .scarcity-chip.med { color: var(--yellow); border-color: rgba(245,200,66,.3); background: rgba(245,200,66,.08); }
   .suggestion-box { padding: 14px 20px; border-bottom: 1px solid var(--border); background: linear-gradient(180deg, rgba(143,207,106,.04), transparent); }
@@ -52,7 +53,7 @@
   .suggestion-pos-tag.QB { background: rgba(245,200,66,.15); color: var(--t4); }
   .no-suggestion { font-size: 12px; color: var(--faint); }
   .roster-section { padding: 14px 20px; border-bottom: 1px solid var(--border); }
-  .roster-section h3 { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+  .roster-section h3 { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px; }
   .roster-grid { display: flex; gap: 8px; flex-wrap: wrap; }
   .roster-slot { font-size: 11px; padding: 5px 10px; border-radius: 8px; background: var(--surface); border: 1px solid var(--border); color: var(--muted); }
   .roster-slot.filled { color: var(--text); border-color: var(--faint); }
@@ -61,7 +62,6 @@
   .toolbar { display: flex; gap: 8px; padding: 12px 20px; flex-wrap: wrap; align-items: center; border-bottom: 1px solid var(--border); }
   .toolbar input, .toolbar select { background: var(--surface); border: 1px solid var(--border); color: var(--text); border-radius: 8px; padding: 7px 12px; font-size: 13px; outline: none; }
   .toolbar input { flex: 1; min-width: 140px; }
-  .toolbar input:focus, .toolbar select:focus { border-color: var(--faint); }
   .toolbar select option { background: var(--surface); }
   .btn { background: var(--surface); border: 1px solid var(--border); color: var(--muted); border-radius: 8px; padding: 7px 14px; font-size: 13px; cursor: pointer; white-space: nowrap; transition: color .15s, border-color .15s; }
   .btn:hover { color: var(--text); border-color: var(--faint); }
@@ -106,9 +106,7 @@
   .update-section h3 { font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 12px; }
   .update-input-row { display: flex; gap: 8px; margin-bottom: 14px; }
   .update-input-row input { flex: 1; background: var(--surface); border: 1px solid var(--border); color: var(--text); border-radius: 8px; padding: 9px 14px; font-size: 13px; outline: none; }
-  .update-input-row input:focus { border-color: var(--faint); }
-  .add-btn { background: var(--surface2); border: 1px solid var(--border); color: var(--text); border-radius: 8px; padding: 9px 18px; font-size: 13px; cursor: pointer; font-weight: 500; white-space: nowrap; transition: border-color .15s; }
-  .add-btn:hover { border-color: var(--faint); }
+  .add-btn { background: var(--surface2); border: 1px solid var(--border); color: var(--text); border-radius: 8px; padding: 9px 18px; font-size: 13px; cursor: pointer; font-weight: 500; white-space: nowrap; }
   .feed { display: flex; flex-direction: column; gap: 8px; }
   .feed-item { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; }
   .feed-item.positive { border-left: 3px solid var(--green); }
@@ -140,6 +138,10 @@
 </style>
 </head>
 <body>
+
+<div id="loading">Loading board from Google Sheets…</div>
+
+<div id="app" style="display:none">
 <header>
   <h1>2026 Draft War Room</h1>
   <span class="draft-badge">PPR</span>
@@ -181,7 +183,9 @@
   </select>
   <button class="btn" onclick="clearDrafted()">Clear drafted</button>
   <button class="btn" onclick="openAddPlayer()">+ Add player</button>
+  <button class="btn" onclick="reloadSheet()">↻ Refresh board</button>
 </div>
+
 <div id="addPlayerModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:100;align-items:center;justify-content:center;">
   <div style="background:#1a1a1a;border:1px solid #2e2e2e;border-radius:12px;padding:24px;width:320px;display:flex;flex-direction:column;gap:12px;">
     <div style="font-size:14px;font-weight:600;color:#f0f0f0;">Add player</div>
@@ -190,7 +194,7 @@
     <select id="ap_pos" style="background:#222;border:1px solid #2e2e2e;color:#f0f0f0;border-radius:8px;padding:8px 12px;font-size:13px;outline:none;">
       <option value="WR">WR</option><option value="RB">RB</option><option value="TE">TE</option><option value="QB">QB</option>
     </select>
-    <input id="ap_tier" placeholder="Tier (1-5)" type="number" min="1" max="6" style="background:#222;border:1px solid #2e2e2e;color:#f0f0f0;border-radius:8px;padding:8px 12px;font-size:13px;outline:none;">
+    <input id="ap_tier" placeholder="Tier (1-6)" type="number" min="1" max="6" style="background:#222;border:1px solid #2e2e2e;color:#f0f0f0;border-radius:8px;padding:8px 12px;font-size:13px;outline:none;">
     <input id="ap_rank" placeholder="Rank (optional — leave blank for auto)" type="number" style="background:#222;border:1px solid #2e2e2e;color:#f0f0f0;border-radius:8px;padding:8px 12px;font-size:13px;outline:none;">
     <div style="display:flex;gap:8px;">
       <button onclick="confirmAddPlayer()" style="flex:1;background:#222;border:1px solid #2e2e2e;color:#f0f0f0;border-radius:8px;padding:9px;font-size:13px;cursor:pointer;font-weight:500;">Add</button>
@@ -198,6 +202,7 @@
     </div>
   </div>
 </div>
+
 <div class="pos-tabs">
   <button class="pos-tab active" onclick="setPos('RB',this)">RB</button>
   <button class="pos-tab" onclick="setPos('WR',this)">WR</button>
@@ -212,9 +217,7 @@
   <div class="leg"><span class="dot" style="background:var(--t5)"></span>Tier 5</div>
 </div>
 <table>
-  <thead>
-    <tr><th>#</th><th>Player</th><th>Team</th><th>Tier</th><th>Notes</th><th>Draft</th></tr>
-  </thead>
+  <thead><tr><th>#</th><th>Player</th><th>Team</th><th>Tier</th><th>Notes</th><th>Draft</th></tr></thead>
   <tbody id="tbody"></tbody>
 </table>
 <div class="update-section">
@@ -225,167 +228,71 @@
   </div>
   <div class="feed" id="feed"><div class="no-feed">No updates yet.</div></div>
 </div>
+</div>
+
 <script>
 const PROXY = 'https://fantasy-football-coach.cade-vassalllo06.workers.dev/';
+const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQw-Qdj_Lw1tyVJcLM9fhgeTyrjdLb0224SwiUwv2AHMjY4nQu_RvnI-hkikSkTbjuLp12PXm2WSlBj/pub?output=csv';
 const TIER_COLORS = ['','var(--t1)','var(--t2)','var(--t3)','var(--t4)','var(--t5)','var(--t5)'];
 
-const DATA = {
-  RB:[
-    {r:1,n:'Bijan Robinson',t:'ATL',tier:1,box:false,inj:false},
-    {r:2,n:'Jahmyr Gibbs',t:'DET',tier:1,box:false,inj:false},
-    {r:3,n:'Christian McCaffrey',t:'SF',tier:1,box:false,inj:false},
-    {r:4,n:'James Cook',t:'BUF',tier:1,box:false,inj:false},
-    {r:5,n:'Jonathan Taylor',t:'IND',tier:1,box:false,inj:false},
-    {r:6,n:'Ashton Jeanty',t:'LV',tier:2,box:true,inj:false},
-    {r:7,n:'Omarion Hampton',t:'LAC',tier:2,box:false,inj:false},
-    {r:8,n:'Chase Brown',t:'CIN',tier:2,box:false,inj:false},
-    {r:9,n:'Kenneth Walker',t:'KC',tier:2,box:false,inj:false},
-    {r:10,n:"De'Von Achane",t:'MIA',tier:2,box:false,inj:false},
-    {r:11,n:'Derrick Henry',t:'BAL',tier:2,box:false,inj:false},
-    {r:12,n:'Saquon Barkley',t:'PHI',tier:2,box:false,inj:false},
-    {r:13,n:'Jeremiyah Love',t:'ARI',tier:3,box:true,inj:false},
-    {r:14,n:'Kyren Williams',t:'LAR',tier:3,box:false,inj:false},
-    {r:15,n:'Breece Hall',t:'NYJ',tier:3,box:false,inj:false},
-    {r:16,n:'Javonte Williams',t:'DEN',tier:3,box:false,inj:false},
-    {r:17,n:'Josh Jacobs',t:'GB',tier:3,box:false,inj:true},
-    {r:18,n:'Cam Skattebo',t:'NYG',tier:3,box:false,inj:false},
-    {r:19,n:'Quinshon Judkins',t:'CLE',tier:3,box:false,inj:false},
-    {r:20,n:'David Montgomery',t:'HOU',tier:3,box:false,inj:false},
-    {r:21,n:'Travis Etienne Jr.',t:'NO',tier:3,box:false,inj:false},
-    {r:22,n:"D'Andre Swift",t:'CHI',tier:3,box:false,inj:false},
-    {r:23,n:'Bucky Irving',t:'TB',tier:4,box:false,inj:false},
-    {r:24,n:'Jadarian Price',t:'SEA',tier:4,box:false,inj:false},
-    {r:25,n:'Bhayshul Tuten',t:'JAX',tier:4,box:false,inj:false},
-    {r:26,n:'Rhamondre Stevenson',t:'NE',tier:4,box:false,inj:false},
-    {r:27,n:'JK Dobbins',t:'DEN',tier:4,box:false,inj:false},
-    {r:28,n:'Jaylen Warren',t:'PIT',tier:4,box:false,inj:false},
-    {r:29,n:'TreVeyon Henderson',t:'NE',tier:4,box:false,inj:false},
-    {r:30,n:'Tony Pollard',t:'TEN',tier:4,box:false,inj:false},
-    {r:31,n:'Chuba Hubbard',t:'CAR',tier:5,box:false,inj:false},
-    {r:32,n:'Rico Dowdle',t:'PIT',tier:5,box:false,inj:false},
-    {r:33,n:'RJ Harvey',t:'DEN',tier:5,box:false,inj:false},
-    {r:34,n:'Aaron Jones',t:'MIN',tier:5,box:false,inj:false},
-    {r:35,n:'Blake Corum',t:'LAR',tier:5,box:false,inj:false},
-    {r:36,n:'Kenneth Gainwell',t:'TB',tier:5,box:true,inj:false},
-    {r:37,n:'Chris Rodriguez Jr.',t:'JAX',tier:5,box:false,inj:false},
-    {r:38,n:'Tyrone Tracy',t:'NYG',tier:5,box:false,inj:false},
-    {r:39,n:'Jonathan Brooks',t:'CAR',tier:5,box:false,inj:false},
-    {r:40,n:'Rachaad White',t:'WAS',tier:5,box:false,inj:false},
-  ],
-  WR:[
-    {r:1,n:"Ja'Marr Chase",t:'CIN',tier:1,box:false,inj:false},
-    {r:2,n:'Puka Nacua',t:'LAR',tier:1,box:false,inj:false},
-    {r:3,n:'Jaxon Smith-Njigba',t:'SEA',tier:1,box:false,inj:false},
-    {r:4,n:'Amon-Ra St. Brown',t:'DET',tier:1,box:false,inj:false},
-    {r:5,n:'Justin Jefferson',t:'MIN',tier:1,box:false,inj:false},
-    {r:6,n:'Drake London',t:'ATL',tier:2,box:true,inj:false},
-    {r:7,n:'CeeDee Lamb',t:'DAL',tier:2,box:false,inj:false},
-    {r:8,n:'AJ Brown',t:'NE',tier:2,box:false,inj:false},
-    {r:9,n:'Nico Collins',t:'HOU',tier:2,box:false,inj:false},
-    {r:10,n:'George Pickens',t:'DAL',tier:2,box:false,inj:false},
-    {r:11,n:'Ladd McConkey',t:'LAC',tier:3,box:true,inj:false},
-    {r:12,n:'DeVonta Smith',t:'PHI',tier:3,box:false,inj:false},
-    {r:13,n:'Garrett Wilson',t:'NYJ',tier:3,box:false,inj:false},
-    {r:14,n:'Malik Nabers',t:'NYG',tier:3,box:false,inj:true},
-    {r:15,n:'Tee Higgins',t:'CIN',tier:3,box:true,inj:false},
-    {r:16,n:'Rashee Rice',t:'KC',tier:3,box:false,inj:true},
-    {r:17,n:'Chris Olave',t:'NO',tier:3,box:false,inj:false},
-    {r:18,n:'Terry McLaurin',t:'WAS',tier:4,box:true,inj:false},
-    {r:19,n:'Emeka Egbuka',t:'TB',tier:4,box:false,inj:false},
-    {r:20,n:'Zay Flowers',t:'BAL',tier:4,box:false,inj:false},
-    {r:21,n:'Mike Evans',t:'SF',tier:4,box:true,inj:false},
-    {r:22,n:'Luther Burden',t:'CHI',tier:4,box:false,inj:false},
-    {r:23,n:'Tetairoa McMillan',t:'CAR',tier:4,box:false,inj:false},
-    {r:24,n:'Davante Adams',t:'LAR',tier:4,box:false,inj:false},
-    {r:25,n:'Jaylen Waddle',t:'DEN',tier:4,box:false,inj:false},
-    {r:26,n:'Christian Watson',t:'GB',tier:4,box:false,inj:false},
-    {r:27,n:'Rome Odunze',t:'CHI',tier:4,box:false,inj:false},
-    {r:28,n:'Carnell Tate',t:'TEN',tier:4,box:false,inj:false},
-    {r:29,n:'Parker Washington',t:'JAX',tier:4,box:false,inj:false},
-    {r:30,n:'Jameson Williams',t:'DET',tier:4,box:false,inj:false},
-    {r:31,n:'Marvin Harrison Jr.',t:'ARI',tier:5,box:false,inj:false},
-    {r:32,n:'Alec Pierce',t:'IND',tier:5,box:false,inj:false},
-    {r:33,n:'Jordyn Tyson',t:'NO',tier:5,box:false,inj:false},
-    {r:34,n:'DJ Moore',t:'BUF',tier:5,box:false,inj:false},
-    {r:35,n:'Courtland Sutton',t:'DEN',tier:5,box:false,inj:false},
-    {r:36,n:'Brian Thomas Jr.',t:'JAX',tier:5,box:false,inj:false},
-    {r:37,n:'Ricky Pearsall',t:'SF',tier:5,box:false,inj:false},
-    {r:38,n:'Makai Lemon',t:'PHI',tier:5,box:false,inj:false},
-    {r:39,n:'Michael Pittman Jr.',t:'PIT',tier:6,box:false,inj:false},
-    {r:40,n:'Michael Wilson',t:'ARI',tier:6,box:false,inj:false},
-    {r:41,n:'Josh Downs',t:'IND',tier:6,box:false,inj:false},
-    {r:42,n:'Isaac Teslaa',t:'DET',tier:6,box:false,inj:false},
-    {r:43,n:'Isaiah Bond',t:'CLE',tier:6,box:false,inj:false},
-  ],
-  TE:[
-    {r:1,n:'Brock Bowers',t:'LV',tier:1,box:false,inj:false},
-    {r:2,n:'Trey McBride',t:'ARI',tier:1,box:false,inj:false},
-    {r:3,n:'Colston Loveland',t:'CHI',tier:2,box:false,inj:false},
-    {r:4,n:'Tucker Kraft',t:'GB',tier:2,box:false,inj:false},
-    {r:5,n:'Tyler Warren',t:'IND',tier:2,box:false,inj:false},
-    {r:6,n:'Sam LaPorta',t:'DET',tier:2,box:false,inj:false},
-    {r:7,n:'Harold Fannin Jr.',t:'CLE',tier:2,box:false,inj:false},
-    {r:8,n:'Kyle Pitts',t:'ATL',tier:2,box:false,inj:false},
-    {r:9,n:'George Kittle',t:'SF',tier:2,box:false,inj:true},
-    {r:10,n:'Dallas Goedert',t:'PHI',tier:3,box:true,inj:false},
-    {r:11,n:'Mark Andrews',t:'BAL',tier:3,box:false,inj:false},
-    {r:12,n:'Travis Kelce',t:'KC',tier:3,box:false,inj:false},
-    {r:13,n:'Dalton Kincaid',t:'BUF',tier:3,box:true,inj:false},
-    {r:14,n:'Jake Ferguson',t:'DAL',tier:3,box:false,inj:false},
-    {r:15,n:'Chig Onkowko',t:'WAS',tier:4,box:true,inj:false},
-    {r:16,n:'Isaiah Likely',t:'NYG',tier:4,box:false,inj:false},
-    {r:17,n:'Oronde Gadsden',t:'LAC',tier:4,box:true,inj:false},
-    {r:18,n:'Kenyon Sadiq',t:'NYJ',tier:4,box:false,inj:false},
-    {r:19,n:'Hunter Henry',t:'NE',tier:4,box:false,inj:false},
-    {r:20,n:'Brenton Strange',t:'JAX',tier:4,box:false,inj:false},
-    {r:21,n:'Dalton Schultz',t:'HOU',tier:4,box:false,inj:false},
-    {r:22,n:'AJ Barner',t:'SEA',tier:4,box:false,inj:false},
-    {r:23,n:'TJ Hockenson',t:'MIN',tier:4,box:false,inj:false},
-    {r:24,n:'Gunnar Helm',t:'TEN',tier:5,box:true,inj:false},
-    {r:25,n:'Greg Dulcich',t:'MIA',tier:5,box:false,inj:false},
-  ],
-  QB:[
-    {r:1,n:'Josh Allen',t:'BUF',tier:1,box:false,inj:false},
-    {r:2,n:'Lamar Jackson',t:'BAL',tier:1,box:false,inj:false},
-    {r:3,n:'Drake Maye',t:'NE',tier:2,box:true,inj:false},
-    {r:4,n:'Jayden Daniels',t:'WAS',tier:2,box:false,inj:false},
-    {r:5,n:'Joe Burrow',t:'CIN',tier:2,box:false,inj:false},
-    {r:6,n:'Justin Herbert',t:'LAC',tier:2,box:false,inj:false},
-    {r:7,n:'Jalen Hurts',t:'PHI',tier:2,box:false,inj:false},
-    {r:8,n:'Jaxson Dart',t:'NYG',tier:3,box:true,inj:false},
-    {r:9,n:'Trevor Lawrence',t:'JAX',tier:3,box:false,inj:false},
-    {r:10,n:'Caleb Williams',t:'CHI',tier:3,box:false,inj:false},
-    {r:11,n:'Brock Purdy',t:'SF',tier:3,box:false,inj:false},
-    {r:12,n:'Kyler Murray',t:'ARI',tier:3,box:false,inj:false},
-    {r:13,n:'Matthew Stafford',t:'LAR',tier:3,box:false,inj:false},
-    {r:14,n:'Dak Prescott',t:'DAL',tier:3,box:false,inj:false},
-    {r:15,n:'Jared Goff',t:'DET',tier:3,box:false,inj:false},
-    {r:16,n:'Patrick Mahomes',t:'KC',tier:3,box:false,inj:true},
-    {r:17,n:'Bo Nix',t:'DEN',tier:4,box:false,inj:true},
-    {r:18,n:'Jordan Love',t:'GB',tier:4,box:false,inj:false},
-    {r:19,n:'Tyler Shough',t:'NO',tier:4,box:true,inj:false},
-    {r:20,n:'Baker Mayfield',t:'TB',tier:4,box:false,inj:false},
-    {r:21,n:'Daniel Jones',t:'IND',tier:4,box:false,inj:false},
-    {r:22,n:'Malik Willis',t:'MIA',tier:4,box:false,inj:false},
-    {r:23,n:'Sam Darnold',t:'SEA',tier:5,box:false,inj:false},
-    {r:24,n:'Cam Ward',t:'TEN',tier:5,box:false,inj:false},
-    {r:25,n:'Bryce Young',t:'CAR',tier:5,box:false,inj:false},
-  ]
-};
+let DATA = { RB:[], WR:[], TE:[], QB:[] };
+
+function parseCSV(text) {
+  const lines = text.trim().split('\n');
+  const headers = lines[0].split(',').map(h => h.trim().replace(/"/g,'').toLowerCase());
+  const result = { RB:[], WR:[], TE:[], QB:[] };
+  for (let i = 1; i < lines.length; i++) {
+    const vals = lines[i].split(',').map(v => v.trim().replace(/"/g,''));
+    const row = {};
+    headers.forEach((h, idx) => row[h] = vals[idx]);
+    const pos = row.position?.toUpperCase();
+    if (!result[pos]) continue;
+    result[pos].push({
+      r:   parseInt(row.rank) || i,
+      n:   row.name,
+      t:   row.team,
+      tier: parseInt(row.tier) || 5,
+      box: row.box?.toUpperCase() === 'TRUE',
+      inj: row.inj?.toUpperCase() === 'TRUE',
+    });
+  }
+  return result;
+}
+
+async function loadSheet() {
+  try {
+    const res = await fetch(SHEET_URL);
+    const text = await res.text();
+    DATA = parseCSV(text);
+    // Merge in any custom players saved locally
+    const savedCustom = load('customPlayers', null);
+    if (savedCustom) {
+      Object.entries(savedCustom).forEach(([pos, players]) => {
+        if (DATA[pos]) DATA[pos].push(...players.map(p => ({...p, custom: true})));
+      });
+    }
+  } catch(e) {
+    console.error('Sheet load failed, using empty board:', e);
+  }
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('numTeams').value = numTeams;
+  document.getElementById('mySlot').value = mySlot;
+  render();
+  renderFeed();
+}
+
+async function reloadSheet() {
+  document.getElementById('loading').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+  await loadSheet();
+}
 
 function load(key, def) {
   try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : def; } catch(e) { return def; }
 }
 function save(key, val) {
   try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) {}
-}
-
-// Load any custom players added via the + Add player button
-const savedCustom = load('customPlayers', null);
-if (savedCustom) {
-  Object.entries(savedCustom).forEach(([pos, players]) => {
-    DATA[pos].push(...players.map(p => ({...p, custom: true})));
-  });
 }
 
 let curPos        = 'RB';
@@ -397,9 +304,6 @@ let injOverrides  = load('injOverrides', {});
 let updates       = load('updates', []);
 let numTeams      = load('numTeams', 10);
 let mySlot        = load('mySlot', 8);
-
-document.getElementById('numTeams').value = numTeams;
-document.getElementById('mySlot').value = mySlot;
 
 function setPos(p, el) {
   curPos = p;
@@ -425,13 +329,11 @@ function getAllPlayersFlat() {
   );
 }
 
-function totalDraftedCount() {
-  return Object.keys(drafted).length;
-}
+function totalDraftedCount() { return Object.keys(drafted).length; }
 
 function updatePickSettings() {
   numTeams = parseInt(document.getElementById('numTeams').value) || 10;
-  mySlot = parseInt(document.getElementById('mySlot').value) || 1;
+  mySlot   = parseInt(document.getElementById('mySlot').value) || 1;
   save('numTeams', numTeams);
   save('mySlot', mySlot);
   renderPickTracker();
@@ -483,19 +385,14 @@ function renderScarcity() {
   if (!bar.innerHTML) bar.innerHTML = '<div class="scarcity-chip">No scarcity alerts yet</div>';
 }
 
-function getMyRoster() {
-  return getAllPlayersFlat().filter(p => drafted[p.key] === 'me');
-}
+function getMyRoster() { return getAllPlayersFlat().filter(p => drafted[p.key] === 'me'); }
 
 function renderRoster() {
   const myTeam = getMyRoster();
   document.getElementById('rosterCount').textContent = `(${myTeam.length} drafted)`;
   const grid = document.getElementById('rosterGrid');
   grid.innerHTML = '';
-  if (myTeam.length === 0) {
-    grid.innerHTML = '<div class="roster-empty">No players drafted yet. Mark players "Me" as you draft them.</div>';
-    return;
-  }
+  if (myTeam.length === 0) { grid.innerHTML = '<div class="roster-empty">No players drafted yet.</div>'; return; }
   const counts = {RB:0, WR:0, TE:0, QB:0};
   myTeam.forEach(p => counts[p.pos] = (counts[p.pos]||0) + 1);
   Object.entries(counts).forEach(([pos, count]) => {
@@ -530,15 +427,12 @@ function renderSuggestions() {
     else if (p.pos === 'QB' && counts.QB < 1) needBoost = 1;
     if (p.pos === 'QB' && counts.QB >= 1) surplusPenalty = p.tier > 1 ? 25 : 4;
     if (p.pos === 'TE' && counts.TE >= 1) surplusPenalty = p.tier > 1 ? 25 : 4;
-    const score = (p.tier * 10) + (p.r * 0.1) - needBoost - (p.box ? 2 : 0) + surplusPenalty;
-    return {...p, score};
+    return {...p, score: (p.tier * 10) + (p.r * 0.1) - needBoost - (p.box ? 2 : 0) + surplusPenalty};
   });
   scored.sort((a, b) => a.score - b.score);
   const list = document.getElementById('suggestionList');
   list.innerHTML = '';
-  const top3 = scored.slice(0, 3);
-  if (!top3.length) { list.innerHTML = '<div class="no-suggestion">No players available.</div>'; return; }
-  top3.forEach((p, i) => {
+  scored.slice(0, 3).forEach((p, i) => {
     let reason = `Tier ${p.tier}`;
     if (p.box) reason += ' · target';
     if (p.pos === 'RB' && counts.RB < 2) reason += ' · fills RB need';
@@ -581,9 +475,7 @@ function render() {
       lastTier = p.tier;
     }
 
-    // True rank = position in fully sorted array matched by name+r to avoid duplicates
     const trueRank = allSorted.findIndex(sp => sp.r === p.r && sp.n === p.n) + 1;
-
     const tags = [];
     if (p.box)     tags.push('<span class="tag target">target</span>');
     if (p.inj)     tags.push('<span class="tag flagged">flagged</span>');
@@ -632,24 +524,18 @@ function confirmAddPlayer() {
   const t    = document.getElementById('ap_team').value.trim().toUpperCase();
   const pos  = document.getElementById('ap_pos').value;
   const tier = parseInt(document.getElementById('ap_tier').value) || 5;
-  // Find a rank number with no existing override
   let autoRank = DATA[pos].length + 101;
   while (rankOverrides[pos + autoRank] !== undefined) autoRank++;
   const rank = parseInt(document.getElementById('ap_rank').value) || autoRank;
   if (!n || !t) return;
   DATA[pos].push({r: rank, n, t, tier, box: false, inj: false, custom: true});
-  save('customPlayers', getCustomPlayers());
+  const custom = load('customPlayers', {RB:[],WR:[],TE:[],QB:[]});
+  if (!custom[pos]) custom[pos] = [];
+  custom[pos].push({r: rank, n, t, tier, box: false, inj: false});
+  save('customPlayers', custom);
   closeAddPlayer();
   ['ap_name','ap_team','ap_tier','ap_rank'].forEach(id => document.getElementById(id).value = '');
   render();
-}
-function getCustomPlayers() {
-  return {
-    RB: DATA.RB.filter(p => p.custom),
-    WR: DATA.WR.filter(p => p.custom),
-    TE: DATA.TE.filter(p => p.custom),
-    QB: DATA.QB.filter(p => p.custom),
-  };
 }
 
 async function addUpdate() {
@@ -748,22 +634,16 @@ function overrideSentiment(id, sentiment) {
   } else {
     entry.sentimentOverride = null;
   }
-  save('updates', updates);
-  save('rankOverrides', rankOverrides);
-  renderFeed();
-  render();
+  save('updates', updates); save('rankOverrides', rankOverrides);
+  renderFeed(); render();
 }
 
 function removeUpdate(id) {
   const entry = updates.find(u => u.id === id);
-  if (entry && entry.snapshot) {
-    rankOverrides = JSON.parse(JSON.stringify(entry.snapshot));
-    save('rankOverrides', rankOverrides);
-  }
+  if (entry && entry.snapshot) { rankOverrides = JSON.parse(JSON.stringify(entry.snapshot)); save('rankOverrides', rankOverrides); }
   updates = updates.filter(u => u.id !== id);
   save('updates', updates);
-  renderFeed();
-  render();
+  renderFeed(); render();
 }
 
 function renderFeed() {
@@ -778,14 +658,13 @@ function renderFeed() {
     if (u.loading) {
       analysisHtml = '<div class="analysing">Analysing…</div>';
     } else if (u.analysis) {
-      const a = u.analysis;
       let movesHtml = '';
-      (a.adjustments || []).forEach(adj => {
+      (u.analysis.adjustments || []).forEach(adj => {
         const dir   = adj.rankChange < 0 ? 'up' : adj.rankChange > 0 ? 'down' : 'watch';
         const label = adj.rankChange < 0 ? `▲${Math.abs(adj.rankChange)} spots` : adj.rankChange > 0 ? `▼${adj.rankChange} spots` : 'watch';
         movesHtml += `<span class="move-tag ${dir}">${adj.player}: ${label}</span>`;
       });
-      analysisHtml = `<div class="feed-analysis">${a.summary}${movesHtml ? '<br><br>'+movesHtml : ''}</div>`;
+      analysisHtml = `<div class="feed-analysis">${u.analysis.summary}${movesHtml ? '<br><br>'+movesHtml : ''}</div>`;
     }
     const posActive = u.sentimentOverride === 'positive' ? 'active-pos' : '';
     const negActive = u.sentimentOverride === 'negative' ? 'active-neg' : '';
@@ -803,8 +682,7 @@ function renderFeed() {
   });
 }
 
-render();
-renderFeed();
+loadSheet();
 </script>
 </body>
 </html>
