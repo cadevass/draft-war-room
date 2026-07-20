@@ -25,15 +25,23 @@
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; min-height: 100vh; }
-  #loading { display: flex; align-items: center; justify-content: center; height: 100vh; font-size: 13px; color: var(--muted); }
+  #loading { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; gap: 12px; font-size: 13px; color: var(--muted); }
+  #loading .spin { width: 20px; height: 20px; border: 2px solid var(--border); border-top-color: var(--muted); border-radius: 50%; animation: spin .8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* RUN ALERT */
-  #runAlert { display: none; position: fixed; top: 16px; left: 50%; transform: translateX(-50%); z-index: 200; background: var(--red); color: #fff; font-size: 13px; font-weight: 600; padding: 10px 20px; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,.5); animation: fadeIn .3s ease; }
+  #runAlert { display: none; position: fixed; top: 16px; left: 50%; transform: translateX(-50%); z-index: 200; background: var(--red); color: #fff; font-size: 13px; font-weight: 600; padding: 10px 20px; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,.5); animation: fadeIn .3s ease; white-space: nowrap; }
   @keyframes fadeIn { from { opacity:0; transform: translateX(-50%) translateY(-8px); } to { opacity:1; transform: translateX(-50%) translateY(0); } }
+
+  #syncStatus { position: fixed; bottom: 16px; right: 16px; font-size: 11px; padding: 4px 10px; border-radius: 10px; background: var(--surface); border: 1px solid var(--border); color: var(--muted); z-index: 100; transition: all .3s; }
+  #syncStatus.saving { color: var(--yellow); border-color: rgba(245,200,66,.3); }
+  #syncStatus.saved { color: var(--green); border-color: rgba(143,207,106,.3); }
+  #syncStatus.error { color: var(--red); border-color: rgba(224,85,85,.3); }
 
   header { padding: 16px 20px 12px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; position: sticky; top: 0; background: var(--bg); z-index: 10; flex-wrap: wrap; }
   header h1 { font-size: 15px; font-weight: 600; letter-spacing: .3px; flex: 1; min-width: 140px; }
   .draft-badge { font-size: 11px; padding: 3px 10px; border-radius: 20px; background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
+  .sleeper-status { font-size: 11px; padding: 3px 10px; border-radius: 20px; border: 1px solid var(--border); color: var(--muted); background: var(--surface); }
+  .sleeper-status.live { color: var(--green); border-color: rgba(143,207,106,.3); background: rgba(143,207,106,.08); }
 
   .pick-tracker { display: flex; align-items: center; gap: 10px; padding: 10px 20px; border-bottom: 1px solid var(--border); background: var(--surface); flex-wrap: wrap; }
   .pick-tracker .pt-item { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
@@ -41,8 +49,8 @@
   .pick-tracker .pt-next { color: var(--yellow); font-weight: 600; font-size: 13px; }
   .pick-tracker input[type=number] { width: 50px; background: var(--surface2); border: 1px solid var(--border); color: var(--text); border-radius: 6px; padding: 4px 6px; font-size: 12px; }
   .pt-divider { width: 1px; height: 16px; background: var(--border); }
+  .draft-id-input { background: var(--surface2); border: 1px solid var(--border); color: var(--text); border-radius: 6px; padding: 4px 8px; font-size: 11px; width: 180px; }
 
-  /* MY PICKS PANEL */
   .my-picks-bar { padding: 8px 20px; border-bottom: 1px solid var(--border); background: var(--surface); display: flex; align-items: center; gap: 8px; overflow-x: auto; }
   .my-picks-label { font-size: 11px; color: var(--muted); white-space: nowrap; font-weight: 500; text-transform: uppercase; letter-spacing: .4px; }
   .pick-chip { font-size: 11px; padding: 3px 9px; border-radius: 10px; background: var(--surface2); border: 1px solid var(--border); color: var(--muted); white-space: nowrap; }
@@ -66,7 +74,6 @@
   .suggestion-pos-tag.WR { background: rgba(122,184,245,.15); color: var(--t2); }
   .suggestion-pos-tag.TE { background: rgba(143,207,106,.15); color: var(--t3); }
   .suggestion-pos-tag.QB { background: rgba(245,200,66,.15); color: var(--t4); }
-  .no-suggestion { font-size: 12px; color: var(--faint); }
 
   .roster-section { padding: 14px 20px; border-bottom: 1px solid var(--border); }
   .roster-section h3 { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px; }
@@ -76,11 +83,10 @@
   .roster-need { color: var(--yellow); }
   .roster-empty { font-size: 12px; color: var(--faint); padding: 4px 0; }
 
-  /* DRAFT LOG */
   .draft-log-section { padding: 14px 20px; border-bottom: 1px solid var(--border); }
   .draft-log-section h3 { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px; }
   .draft-log-empty { font-size: 12px; color: var(--faint); }
-  .draft-log-list { display: flex; flex-direction: column; gap: 4px; max-height: 200px; overflow-y: auto; }
+  .draft-log-list { display: flex; flex-direction: column; gap: 4px; max-height: 180px; overflow-y: auto; }
   .draft-log-item { display: flex; align-items: center; gap: 8px; padding: 5px 0; border-bottom: 0.5px solid var(--border); font-size: 12px; }
   .draft-log-item:last-child { border-bottom: none; }
   .log-pick-num { color: var(--muted); font-size: 11px; min-width: 28px; }
@@ -91,6 +97,19 @@
   .log-pos-tag.TE { background: rgba(143,207,106,.15); color: var(--t3); }
   .log-pos-tag.QB { background: rgba(245,200,66,.15); color: var(--t4); }
   .log-team { font-size: 11px; color: var(--muted); }
+
+  .opponent-section { padding: 14px 20px; border-bottom: 1px solid var(--border); }
+  .opponent-section h3 { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px; }
+  .opponent-grid { display: flex; flex-direction: column; gap: 6px; }
+  .opponent-row { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+  .opp-label { color: var(--muted); min-width: 60px; }
+  .opp-pos-bars { display: flex; gap: 4px; flex: 1; flex-wrap: wrap; }
+  .opp-pos-chip { font-size: 10px; padding: 2px 7px; border-radius: 8px; }
+  .opp-pos-chip.heavy { font-weight: 600; color: var(--red); background: rgba(224,85,85,.1); border: 1px solid rgba(224,85,85,.2); }
+  .opp-pos-chip.moderate { color: var(--yellow); background: rgba(245,200,66,.08); border: 1px solid rgba(245,200,66,.15); }
+  .opp-pos-chip.light { color: var(--muted); background: var(--surface); border: 1px solid var(--border); }
+  .opp-empty { font-size: 12px; color: var(--faint); }
+  .opp-alert { font-size: 11px; color: var(--red); margin-left: 4px; }
 
   .toolbar { display: flex; gap: 8px; padding: 12px 20px; flex-wrap: wrap; align-items: center; border-bottom: 1px solid var(--border); }
   .toolbar input, .toolbar select { background: var(--surface); border: 1px solid var(--border); color: var(--text); border-radius: 8px; padding: 7px 12px; font-size: 13px; outline: none; }
@@ -104,7 +123,7 @@
   .pos-tab.active { color: var(--text); border-bottom-color: var(--text); }
   .pos-tab:hover { color: var(--text); }
 
-  .legend { display: flex; gap: 16px; padding: 8px 20px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+  .legend { display: flex; gap: 16px; padding: 8px 20px; border-bottom: 1px solid var(--border); flex-wrap: wrap; align-items: center; }
   .leg { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--muted); }
   .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
 
@@ -125,16 +144,16 @@
   .tag.down { background: rgba(224,85,85,.15); color: var(--red); border: 1px solid rgba(224,85,85,.25); }
   .tag.gone { background: rgba(136,136,136,.1); color: var(--muted); border: 1px solid var(--border); }
   .tag.mine { background: rgba(143,207,106,.18); color: var(--green); border: 1px solid rgba(143,207,106,.3); }
+  .tag.auto { background: rgba(122,184,245,.15); color: var(--t2); border: 1px solid rgba(122,184,245,.25); font-size: 9px; }
   .team { font-size: 11px; color: var(--muted); }
   .tier-num { font-size: 12px; color: var(--muted); }
   .adp-col { font-size: 11px; color: var(--muted); }
-  .adp-col.value { color: var(--green); }
-  .adp-col.reach { color: var(--red); }
+  .adp-col.value { color: var(--green); font-weight: 500; }
+  .adp-col.reach { color: var(--red); font-weight: 500; }
   .bye-col { font-size: 11px; color: var(--muted); }
   .notes-input { background: transparent; border: none; border-bottom: 1px solid transparent; color: var(--text); font-size: 12px; width: 100%; outline: none; padding: 2px 0; transition: border-color .15s; }
   .notes-input:focus { border-bottom-color: var(--faint); }
   .notes-input::placeholder { color: var(--faint); }
-  input[type=checkbox] { accent-color: var(--green); width: 14px; height: 14px; cursor: pointer; }
   .draft-actions { display: flex; gap: 4px; }
   .draft-actions button { font-size: 10px; padding: 3px 7px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); color: var(--muted); cursor: pointer; }
   .draft-actions button.me { color: var(--green); }
@@ -171,6 +190,15 @@
   .analysing { font-size: 12px; color: var(--muted); font-style: italic; margin-top: 8px; }
   .no-feed { font-size: 13px; color: var(--faint); padding: 8px 0; }
 
+  #addPlayerModal { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,.7); z-index:100; align-items:center; justify-content:center; }
+  .modal-box { background:#1a1a1a; border:1px solid #2e2e2e; border-radius:12px; padding:24px; width:320px; display:flex; flex-direction:column; gap:12px; }
+  .modal-box input, .modal-box select { background:#222; border:1px solid #2e2e2e; color:#f0f0f0; border-radius:8px; padding:8px 12px; font-size:13px; outline:none; width:100%; }
+  .modal-title { font-size:14px; font-weight:600; color:#f0f0f0; }
+  .modal-actions { display:flex; gap:8px; }
+  .modal-actions button { flex:1; border-radius:8px; padding:9px; font-size:13px; cursor:pointer; }
+  .modal-btn-primary { background:#222; border:1px solid #2e2e2e; color:#f0f0f0; font-weight:500; }
+  .modal-btn-cancel { background:transparent; border:1px solid #2e2e2e; color:#888; }
+
   @media (max-width: 600px) {
     .toolbar { padding: 10px 12px; }
     td, th { padding: 7px 8px; }
@@ -182,12 +210,14 @@
 <body>
 
 <div id="runAlert"></div>
-<div id="loading">Loading board from Google Sheets…</div>
+<div id="syncStatus">synced</div>
+<div id="loading"><div class="spin"></div>Loading war room…</div>
 
 <div id="app" style="display:none">
 <header>
   <h1>2026 Draft War Room</h1>
   <span class="draft-badge">PPR</span>
+  <span class="sleeper-status" id="sleeperStatus">Sleeper: standby</span>
 </header>
 
 <div class="pick-tracker">
@@ -198,10 +228,13 @@
   <div class="pt-item">Round: <span class="pt-num" id="curRound">1</span></div>
   <div class="pt-divider"></div>
   <div class="pt-item pt-next" id="nextPickInfo">Your pick now</div>
+  <div class="pt-divider"></div>
+  <div class="pt-item">
+    Draft ID: <input class="draft-id-input" id="draftIdInput" placeholder="Paste Sleeper draft ID…" onchange="startSleeperPolling()">
+  </div>
 </div>
 
 <div class="my-picks-bar" id="myPicksBar"></div>
-
 <div class="scarcity-bar" id="scarcityBar"></div>
 
 <div class="suggestion-box">
@@ -216,7 +249,12 @@
 
 <div class="draft-log-section">
   <h3>Draft log</h3>
-  <div id="draftLog"><div class="draft-log-empty">No players drafted yet.</div></div>
+  <div id="draftLog"><div class="draft-log-empty">No picks yet.</div></div>
+</div>
+
+<div class="opponent-section">
+  <h3>Opponent tendencies</h3>
+  <div id="opponentGrid"><div class="opp-empty">Mark players as drafted to see opponent patterns.</div></div>
 </div>
 
 <div class="toolbar">
@@ -241,19 +279,17 @@
   <button class="btn" onclick="reloadSheet()">↻ Refresh board</button>
 </div>
 
-<div id="addPlayerModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:100;align-items:center;justify-content:center;">
-  <div style="background:#1a1a1a;border:1px solid #2e2e2e;border-radius:12px;padding:24px;width:320px;display:flex;flex-direction:column;gap:12px;">
-    <div style="font-size:14px;font-weight:600;color:#f0f0f0;">Add player</div>
-    <input id="ap_name" placeholder="Name" style="background:#222;border:1px solid #2e2e2e;color:#f0f0f0;border-radius:8px;padding:8px 12px;font-size:13px;outline:none;">
-    <input id="ap_team" placeholder="Team (e.g. CLE)" style="background:#222;border:1px solid #2e2e2e;color:#f0f0f0;border-radius:8px;padding:8px 12px;font-size:13px;outline:none;">
-    <select id="ap_pos" style="background:#222;border:1px solid #2e2e2e;color:#f0f0f0;border-radius:8px;padding:8px 12px;font-size:13px;outline:none;">
-      <option value="WR">WR</option><option value="RB">RB</option><option value="TE">TE</option><option value="QB">QB</option>
-    </select>
-    <input id="ap_tier" placeholder="Tier (1-6)" type="number" min="1" max="6" style="background:#222;border:1px solid #2e2e2e;color:#f0f0f0;border-radius:8px;padding:8px 12px;font-size:13px;outline:none;">
-    <input id="ap_rank" placeholder="Rank (optional — leave blank for auto)" type="number" style="background:#222;border:1px solid #2e2e2e;color:#f0f0f0;border-radius:8px;padding:8px 12px;font-size:13px;outline:none;">
-    <div style="display:flex;gap:8px;">
-      <button onclick="confirmAddPlayer()" style="flex:1;background:#222;border:1px solid #2e2e2e;color:#f0f0f0;border-radius:8px;padding:9px;font-size:13px;cursor:pointer;font-weight:500;">Add</button>
-      <button onclick="closeAddPlayer()" style="flex:1;background:transparent;border:1px solid #2e2e2e;color:#888;border-radius:8px;padding:9px;font-size:13px;cursor:pointer;">Cancel</button>
+<div id="addPlayerModal">
+  <div class="modal-box">
+    <div class="modal-title">Add player</div>
+    <input id="ap_name" placeholder="Name">
+    <input id="ap_team" placeholder="Team (e.g. CLE)">
+    <select id="ap_pos"><option value="WR">WR</option><option value="RB">RB</option><option value="TE">TE</option><option value="QB">QB</option></select>
+    <input id="ap_tier" placeholder="Tier (1-6)" type="number" min="1" max="6">
+    <input id="ap_rank" placeholder="Rank (optional — leave blank for auto)" type="number">
+    <div class="modal-actions">
+      <button class="modal-btn-primary" onclick="confirmAddPlayer()">Add</button>
+      <button class="modal-btn-cancel" onclick="closeAddPlayer()">Cancel</button>
     </div>
   </div>
 </div>
@@ -271,25 +307,15 @@
   <div class="leg"><span class="dot" style="background:var(--t3)"></span>Tier 3</div>
   <div class="leg"><span class="dot" style="background:var(--t4)"></span>Tier 4</div>
   <div class="leg"><span class="dot" style="background:var(--t5)"></span>Tier 5</div>
-  <div class="leg" style="margin-left:auto;gap:12px;display:flex;">
-    <span style="font-size:11px;color:var(--green);">▲ value</span>
-    <span style="font-size:11px;color:var(--red);">▼ reach</span>
-    <span style="font-size:11px;color:var(--muted);">ADP / Bye</span>
+  <div style="margin-left:auto;display:flex;gap:12px;">
+    <span style="font-size:11px;color:var(--green);">▲ ADP value</span>
+    <span style="font-size:11px;color:var(--red);">▼ ADP reach</span>
   </div>
 </div>
 
 <table>
   <thead>
-    <tr>
-      <th>#</th>
-      <th>Player</th>
-      <th>Team</th>
-      <th>Tier</th>
-      <th>ADP</th>
-      <th>Bye</th>
-      <th>Notes</th>
-      <th>Draft</th>
-    </tr>
+    <tr><th>#</th><th>Player</th><th>Team</th><th>Tier</th><th>ADP</th><th>Bye</th><th>Notes</th><th>Draft</th></tr>
   </thead>
   <tbody id="tbody"></tbody>
 </table>
@@ -305,12 +331,152 @@
 </div>
 
 <script>
-const PROXY = 'https://fantasy-football-coach.cade-vassalllo06.workers.dev/';
-const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQw-Qdj_Lw1tyVJcLM9fhgeTyrjdLb0224SwiUwv2AHMjY4nQu_RvnI-hkikSkTbjuLp12PXm2WSlBj/pub?output=csv';
+// ─── CONFIG ────────────────────────────────────────────────────────────────
+const PROXY      = 'https://fantasy-football-coach.cade-vassalllo06.workers.dev/';
+const SHEET_URL  = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQw-Qdj_Lw1tyVJcLM9fhgeTyrjdLb0224SwiUwv2AHMjY4nQu_RvnI-hkikSkTbjuLp12PXm2WSlBj/pub?output=csv';
+const SUPA_URL   = 'https://tdtduxllurlsigctqqkj.supabase.co';
+const SUPA_KEY   = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRkdGR1eGxsdXJsc2lnY3RxcWtqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ1Mjc4ODYsImV4cCI6MjEwMDEwMzg4Nn0.pThc2a9JcKnrb3ETg1wVlIQ5eaFlpZ8Q0VnHaHyJEDI';
+const SESSION_ID = 'draft-2026-main';
+const MY_ROSTER_ID = 4;
+const MAX_RANK_OVERRIDE = 8; // ±8 cap
+
 const TIER_COLORS = ['','var(--t1)','var(--t2)','var(--t3)','var(--t4)','var(--t5)','var(--t5)'];
 
-let DATA = { RB:[], WR:[], TE:[], QB:[] };
+// ─── ALIAS DICTIONARY ──────────────────────────────────────────────────────
+const ALIASES = {
+  'cmc': 'Christian McCaffrey',
+  'saquon': 'Saquon Barkley',
+  'jt': 'Jonathan Taylor',
+  'henry': 'Derrick Henry',
+  'bijan': 'Bijan Robinson',
+  'gibbs': 'Jahmyr Gibbs',
+  'achane': "De'Von Achane",
+  'jeanty': 'Ashton Jeanty',
+  'hampton': 'Omarion Hampton',
+  'tuten': 'Bhayshul Tuten',
+  'chase': "Ja'Marr Chase",
+  'jsn': 'Jaxon Smith-Njigba',
+  'arsb': 'Amon-Ra St. Brown',
+  'jefferson': 'Justin Jefferson',
+  'lamb': 'CeeDee Lamb',
+  'ajb': 'AJ Brown',
+  'aj': 'AJ Brown',
+  'nabers': 'Malik Nabers',
+  'higgins': 'Tee Higgins',
+  'rice': 'Rashee Rice',
+  'mcconkey': 'Ladd McConkey',
+  'mclaurin': 'Terry McLaurin',
+  'egbuka': 'Emeka Egbuka',
+  'metcalf': 'DK Metcalf',
+  'godwin': 'Chris Godwin',
+  'bowers': 'Brock Bowers',
+  'mcbride': 'Trey McBride',
+  'loveland': 'Colston Loveland',
+  'kittle': 'George Kittle',
+  'kelce': 'Travis Kelce',
+  'goedert': 'Dallas Goedert',
+  'andrews': 'Mark Andrews',
+  'fannin': 'Harold Fannin Jr.',
+  'allen': 'Josh Allen',
+  'lamar': 'Lamar Jackson',
+  'maye': 'Drake Maye',
+  'daniels': 'Jayden Daniels',
+  'burrow': 'Joe Burrow',
+  'hurts': 'Jalen Hurts',
+  'dart': 'Jaxson Dart',
+};
 
+// ─── STATE ─────────────────────────────────────────────────────────────────
+let DATA = { RB:[], WR:[], TE:[], QB:[] };
+let curPos        = 'RB';
+let drafted       = {};
+let notes         = {};
+let rankOverrides = {};
+let tierOverrides = {};
+let injOverrides  = {};
+let updates       = [];
+let numTeams      = 10;
+let mySlot        = 8;
+let sleeperPollInterval = null;
+let sleeperSeenPicks = new Set();
+let runAlertTimer = null;
+let syncTimer = null;
+
+// ─── SUPABASE ──────────────────────────────────────────────────────────────
+async function supaLoad() {
+  try {
+    const res = await fetch(`${SUPA_URL}/rest/v1/draft_state?id=eq.${SESSION_ID}&select=data`, {
+      headers: { 'apikey': SUPA_KEY, 'Authorization': `Bearer ${SUPA_KEY}` }
+    });
+    const rows = await res.json();
+    if (rows.length && rows[0].data) {
+      const d = rows[0].data;
+      drafted       = d.drafted       || {};
+      notes         = d.notes         || {};
+      rankOverrides = d.rankOverrides  || {};
+      tierOverrides = d.tierOverrides  || {};
+      injOverrides  = d.injOverrides   || {};
+      updates       = d.updates        || [];
+      numTeams      = d.numTeams       || 10;
+      mySlot        = d.mySlot         || 8;
+      const draftId = d.draftId || '';
+      if (draftId) {
+        document.getElementById('draftIdInput').value = draftId;
+        startSleeperPolling();
+      }
+    }
+  } catch(e) {
+    console.warn('Supabase load failed, using localStorage fallback:', e);
+    drafted       = lsLoad('drafted', {});
+    notes         = lsLoad('notes', {});
+    rankOverrides = lsLoad('rankOverrides', {});
+    tierOverrides = lsLoad('tierOverrides', {});
+    injOverrides  = lsLoad('injOverrides', {});
+    updates       = lsLoad('updates', []);
+    numTeams      = lsLoad('numTeams', 10);
+    mySlot        = lsLoad('mySlot', 8);
+  }
+}
+
+async function supaSave() {
+  setSyncStatus('saving', 'saving…');
+  const draftId = document.getElementById('draftIdInput')?.value.trim() || '';
+  const payload = { drafted, notes, rankOverrides, tierOverrides, injOverrides, updates, numTeams, mySlot, draftId };
+  // Also save to localStorage as fallback
+  Object.entries(payload).forEach(([k,v]) => lsSave(k, v));
+  try {
+    await fetch(`${SUPA_URL}/rest/v1/draft_state`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPA_KEY,
+        'Authorization': `Bearer ${SUPA_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'resolution=merge-duplicates'
+      },
+      body: JSON.stringify({ id: SESSION_ID, data: payload })
+    });
+    setSyncStatus('saved', 'synced ✓');
+  } catch(e) {
+    setSyncStatus('error', 'sync failed');
+  }
+}
+
+function debounceSave() {
+  if (syncTimer) clearTimeout(syncTimer);
+  syncTimer = setTimeout(supaSave, 1500);
+}
+
+function setSyncStatus(cls, msg) {
+  const el = document.getElementById('syncStatus');
+  el.className = cls;
+  el.textContent = msg;
+}
+
+// ─── LOCAL STORAGE FALLBACK ────────────────────────────────────────────────
+function lsLoad(key, def) { try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : def; } catch(e) { return def; } }
+function lsSave(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) {} }
+
+// ─── SHEET LOADING ─────────────────────────────────────────────────────────
 function parseCSV(text) {
   const lines = text.trim().split('\n');
   const headers = lines[0].split(',').map(h => h.trim().replace(/"/g,'').toLowerCase());
@@ -340,55 +506,73 @@ async function loadSheet() {
     const res = await fetch(SHEET_URL);
     const text = await res.text();
     DATA = parseCSV(text);
-    const savedCustom = load('customPlayers', null);
+    const savedCustom = lsLoad('customPlayers', null);
     if (savedCustom) {
       Object.entries(savedCustom).forEach(([pos, players]) => {
         if (DATA[pos]) DATA[pos].push(...players.map(p => ({...p, custom: true})));
       });
     }
-  } catch(e) {
-    console.error('Sheet load failed:', e);
-  }
-  document.getElementById('loading').style.display = 'none';
-  document.getElementById('app').style.display = 'block';
-  document.getElementById('numTeams').value = numTeams;
-  document.getElementById('mySlot').value = mySlot;
-  render();
-  renderFeed();
+  } catch(e) { console.error('Sheet load failed:', e); }
 }
 
 async function reloadSheet() {
   document.getElementById('loading').style.display = 'flex';
   document.getElementById('app').style.display = 'none';
   await loadSheet();
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  render(); renderFeed();
 }
 
-function load(key, def) {
-  try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : def; } catch(e) { return def; }
-}
-function save(key, val) {
-  try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) {}
-}
-
-let curPos        = 'RB';
-let drafted       = load('drafted', {});       // key -> { who: 'me'|'other', pickNum: N, pos: 'RB' }
-let notes         = load('notes', {});
-let rankOverrides = load('rankOverrides', {});
-let tierOverrides = load('tierOverrides', {});
-let injOverrides  = load('injOverrides', {});
-let updates       = load('updates', []);
-let numTeams      = load('numTeams', 10);
-let mySlot        = load('mySlot', 8);
-
-let runAlertTimer = null;
-
-function setPos(p, el) {
-  curPos = p;
-  document.querySelectorAll('.pos-tab').forEach(b => b.classList.remove('active'));
-  el.classList.add('active');
-  render();
+// ─── SLEEPER POLLING ───────────────────────────────────────────────────────
+function startSleeperPolling() {
+  const draftId = document.getElementById('draftIdInput').value.trim();
+  if (!draftId) return;
+  if (sleeperPollInterval) clearInterval(sleeperPollInterval);
+  pollSleeper(draftId);
+  sleeperPollInterval = setInterval(() => pollSleeper(draftId), 15000);
+  document.getElementById('sleeperStatus').textContent = 'Sleeper: polling';
+  document.getElementById('sleeperStatus').className = 'sleeper-status live';
 }
 
+async function pollSleeper(draftId) {
+  try {
+    const res = await fetch(`https://api.sleeper.app/v1/draft/${draftId}/picks`);
+    const picks = await res.json();
+    let newPicks = false;
+    picks.forEach(pick => {
+      if (sleeperSeenPicks.has(pick.pick_no)) return;
+      sleeperSeenPicks.add(pick.pick_no);
+      const firstName = pick.metadata?.first_name || '';
+      const lastName  = pick.metadata?.last_name  || '';
+      const fullName  = `${firstName} ${lastName}`.trim();
+      const pos       = pick.metadata?.position?.toUpperCase();
+      const who       = pick.roster_id === MY_ROSTER_ID ? 'me' : 'other';
+      // Find player in DATA
+      const posArr = DATA[pos] || [];
+      const player = posArr.find(p => p.n === fullName) ||
+                     posArr.find(p => p.n.toLowerCase() === fullName.toLowerCase());
+      if (player) {
+        const key = pos + player.r;
+        if (!drafted[key]) {
+          drafted[key] = { who, pickNum: pick.pick_no, pos, auto: true };
+          newPicks = true;
+        }
+      }
+    });
+    if (newPicks) {
+      checkRunAlert();
+      render();
+      debounceSave();
+    }
+    document.getElementById('sleeperStatus').textContent = `Sleeper: live (${picks.length} picks)`;
+  } catch(e) {
+    document.getElementById('sleeperStatus').textContent = 'Sleeper: error';
+    document.getElementById('sleeperStatus').className = 'sleeper-status';
+  }
+}
+
+// ─── PLAYERS ───────────────────────────────────────────────────────────────
 function getPlayers(pos) {
   return DATA[pos].map(p => {
     const key = pos + p.r;
@@ -408,11 +592,11 @@ function getAllPlayersFlat() {
 
 function totalDraftedCount() { return Object.keys(drafted).length; }
 
+// ─── PICK TRACKER ──────────────────────────────────────────────────────────
 function updatePickSettings() {
   numTeams = parseInt(document.getElementById('numTeams').value) || 10;
   mySlot   = parseInt(document.getElementById('mySlot').value) || 1;
-  save('numTeams', numTeams);
-  save('mySlot', mySlot);
+  debounceSave();
   render();
 }
 
@@ -436,42 +620,40 @@ function renderPickTracker() {
   const round = Math.floor((overallPick - 1) / numTeams) + 1;
   document.getElementById('overallPick').textContent = overallPick;
   document.getElementById('curRound').textContent = round;
-
   const myPicks = getMyPickNumbers(overallPick + numTeams * 4);
   const nextMyPick = myPicks.find(p => p >= overallPick);
   const picksAway = nextMyPick - overallPick;
   document.getElementById('nextPickInfo').textContent =
-    picksAway === 0 ? '🟢 Your pick now!' : `Your pick in ${picksAway} pick${picksAway === 1 ? '' : 's'} (pick ${nextMyPick})`;
+    picksAway === 0 ? '🟢 Your pick now!' : `Your pick in ${picksAway} pick${picksAway===1?'':'s'} (pick ${nextMyPick})`;
 
-  // My picks bar
   const bar = document.getElementById('myPicksBar');
   bar.innerHTML = '<span class="my-picks-label">Your picks →</span>';
   myPicks.slice(0, 15).forEach(p => {
-    const chip = document.createElement('span');
     const isPast = p < overallPick;
     const isNext = p === nextMyPick;
-    chip.className = 'pick-chip' + (isPast ? ' past' : '') + (isNext ? ' next' : '');
-    const r = Math.floor((p - 1) / numTeams) + 1;
-    const slot = ((p - 1) % numTeams) + 1;
+    const chip = document.createElement('span');
+    chip.className = 'pick-chip' + (isPast?' past':'') + (isNext?' next':'');
+    const r = Math.floor((p-1)/numTeams)+1;
+    const slot = ((p-1)%numTeams)+1;
     chip.textContent = `${r}.${String(slot).padStart(2,'0')}`;
     chip.title = `Overall pick ${p}`;
     bar.appendChild(chip);
   });
 }
 
+// ─── SCARCITY ──────────────────────────────────────────────────────────────
 function renderScarcity() {
   const bar = document.getElementById('scarcityBar');
   bar.innerHTML = '';
   ['RB','WR','TE','QB'].forEach(pos => {
     const players = getPlayers(pos);
     [1,2,3].forEach(tierNum => {
-      const remaining = players.filter(p => p.tier === tierNum && !drafted[pos + p.r]).length;
-      const totalInTier = players.filter(p => p.tier === tierNum).length;
-      if (totalInTier === 0) return;
-      if (remaining <= 3) {
-        const cls = remaining <= 1 ? 'low' : 'med';
+      const remaining = players.filter(p => p.tier===tierNum && !drafted[pos+p.r]).length;
+      const totalInTier = players.filter(p => p.tier===tierNum).length;
+      if (totalInTier===0) return;
+      if (remaining<=3) {
         const chip = document.createElement('div');
-        chip.className = `scarcity-chip ${cls}`;
+        chip.className = 'scarcity-chip ' + (remaining<=1?'low':'med');
         chip.textContent = `${pos} T${tierNum}: ${remaining} left`;
         bar.appendChild(chip);
       }
@@ -480,190 +662,252 @@ function renderScarcity() {
   if (!bar.innerHTML) bar.innerHTML = '<div class="scarcity-chip">No scarcity alerts yet</div>';
 }
 
-function getMyRoster() { return getAllPlayersFlat().filter(p => drafted[p.key]?.who === 'me'); }
+// ─── ROSTER ────────────────────────────────────────────────────────────────
+function getMyRoster() { return getAllPlayersFlat().filter(p => drafted[p.key]?.who==='me'); }
 
 function renderRoster() {
   const myTeam = getMyRoster();
   document.getElementById('rosterCount').textContent = `(${myTeam.length} drafted)`;
   const grid = document.getElementById('rosterGrid');
   grid.innerHTML = '';
-  if (myTeam.length === 0) { grid.innerHTML = '<div class="roster-empty">No players drafted yet.</div>'; return; }
-  const counts = {RB:0, WR:0, TE:0, QB:0};
-  myTeam.forEach(p => counts[p.pos] = (counts[p.pos]||0) + 1);
-  Object.entries(counts).forEach(([pos, count]) => {
+  if (!myTeam.length) { grid.innerHTML = '<div class="roster-empty">No players drafted yet.</div>'; return; }
+  const counts = {RB:0,WR:0,TE:0,QB:0};
+  myTeam.forEach(p => counts[p.pos]=(counts[p.pos]||0)+1);
+  Object.entries(counts).forEach(([pos,count]) => {
     const slot = document.createElement('div');
     slot.className = 'roster-slot filled';
     slot.textContent = `${pos}: ${count}`;
     grid.appendChild(slot);
   });
   const needs = [];
-  if (counts.RB < 2) needs.push('RB');
-  if (counts.WR < 2) needs.push('WR');
-  if (counts.TE < 1) needs.push('TE');
-  if (counts.QB < 1) needs.push('QB');
+  if (counts.RB<2) needs.push('RB');
+  if (counts.WR<2) needs.push('WR');
+  if (counts.TE<1) needs.push('TE');
+  if (counts.QB<1) needs.push('QB');
   if (needs.length) {
-    const needSlot = document.createElement('div');
-    needSlot.className = 'roster-slot roster-need';
-    needSlot.textContent = `Need: ${needs.join(', ')}`;
-    grid.appendChild(needSlot);
+    const s = document.createElement('div');
+    s.className='roster-slot roster-need';
+    s.textContent=`Need: ${needs.join(', ')}`;
+    grid.appendChild(s);
   }
 }
 
+// ─── DRAFT LOG ─────────────────────────────────────────────────────────────
 function renderDraftLog() {
   const container = document.getElementById('draftLog');
-  // Get all drafted players in pick order
   const allPlayers = getAllPlayersFlat();
   const log = [];
   Object.entries(drafted).forEach(([key, val]) => {
-    if (!val || val.who !== 'other') return;
-    const player = allPlayers.find(p => p.key === key);
-    if (player) log.push({...player, pickNum: val.pickNum || 0});
+    if (!val || val.who!=='other') return;
+    const player = allPlayers.find(p => p.key===key);
+    if (player) log.push({...player, pickNum: val.pickNum||0, auto: val.auto||false});
   });
-  log.sort((a, b) => a.pickNum - b.pickNum);
-
-  if (log.length === 0) { container.innerHTML = '<div class="draft-log-empty">No players marked as drafted by others yet.</div>'; return; }
-
+  log.sort((a,b)=>a.pickNum-b.pickNum);
+  if (!log.length) { container.innerHTML='<div class="draft-log-empty">No players marked as drafted by others yet.</div>'; return; }
   const list = document.createElement('div');
-  list.className = 'draft-log-list';
+  list.className='draft-log-list';
   log.forEach(p => {
     const item = document.createElement('div');
-    item.className = 'draft-log-item';
-    item.innerHTML = `
+    item.className='draft-log-item';
+    item.innerHTML=`
       <span class="log-pick-num">P${p.pickNum}</span>
       <span class="log-pos-tag ${p.pos}">${p.pos}</span>
-      <span class="log-player-name">${p.n}</span>
+      <span class="log-player-name">${p.n}${p.auto?'<span class="tag auto" style="margin-left:4px">auto</span>':''}</span>
       <span class="log-team">${p.t}</span>
     `;
     list.appendChild(item);
   });
-  container.innerHTML = '';
+  container.innerHTML='';
   container.appendChild(list);
 }
 
+// ─── OPPONENT MODELLING ────────────────────────────────────────────────────
+function renderOpponents() {
+  const container = document.getElementById('opponentGrid');
+  const allPlayers = getAllPlayersFlat();
+
+  // Build per-pick-slot roster counts (approximate team assignment by pick order)
+  // Group picks into teams using snake draft logic
+  const teamPicks = {}; // pickNum -> team slot
+  const totalDrafted = Object.keys(drafted).length;
+  if (totalDrafted === 0) { container.innerHTML='<div class="opp-empty">Mark players as drafted to see opponent patterns.</div>'; return; }
+
+  // Get all other picks with pick numbers
+  const otherPicks = [];
+  Object.entries(drafted).forEach(([key, val]) => {
+    if (!val || val.who!=='other') return;
+    const player = allPlayers.find(p => p.key===key);
+    if (player) otherPicks.push({...player, pickNum: val.pickNum||0});
+  });
+
+  if (!otherPicks.length) { container.innerHTML='<div class="opp-empty">No other picks logged yet.</div>'; return; }
+
+  // Assign picks to teams based on snake draft pick number
+  const teams = {}; // teamSlot -> {RB:0,WR:0,TE:0,QB:0,picks:[]}
+  otherPicks.forEach(p => {
+    const pickNum = p.pickNum;
+    const round = Math.floor((pickNum-1)/numTeams);
+    const slotInRound = ((pickNum-1)%numTeams)+1;
+    const teamSlot = round%2===0 ? slotInRound : (numTeams-slotInRound+1);
+    if (!teams[teamSlot]) teams[teamSlot]={RB:0,WR:0,TE:0,QB:0,picks:[]};
+    teams[teamSlot][p.pos]=(teams[teamSlot][p.pos]||0)+1;
+    teams[teamSlot].picks.push(p);
+  });
+
+  const grid = document.createElement('div');
+  grid.className='opponent-grid';
+
+  // Recent run detection — last 4 other picks
+  const sorted = [...otherPicks].sort((a,b)=>a.pickNum-b.pickNum);
+  const last4 = sorted.slice(-4);
+  const recentPos = {};
+  last4.forEach(p => recentPos[p.pos]=(recentPos[p.pos]||0)+1);
+  const runPos = Object.entries(recentPos).filter(([,c])=>c>=3).map(([pos])=>pos);
+  if (runPos.length) {
+    const alert = document.createElement('div');
+    alert.style.cssText='font-size:12px;color:var(--red);font-weight:600;margin-bottom:8px;';
+    alert.textContent=`⚠ ${runPos.join(', ')} run detected in last 4 picks`;
+    grid.appendChild(alert);
+  }
+
+  Object.entries(teams).sort((a,b)=>parseInt(a[0])-parseInt(b[0])).forEach(([slot,team]) => {
+    const row = document.createElement('div');
+    row.className='opponent-row';
+    const bars = document.createElement('div');
+    bars.className='opp-pos-bars';
+    ['RB','WR','TE','QB'].forEach(pos => {
+      const count = team[pos]||0;
+      if (count===0) return;
+      const chip = document.createElement('span');
+      const cls = count>=3?'heavy':count>=2?'moderate':'light';
+      chip.className=`opp-pos-chip ${cls}`;
+      chip.textContent=`${count}${pos}`;
+      bars.appendChild(chip);
+    });
+    row.innerHTML=`<span class="opp-label">Team ${slot}</span>`;
+    row.appendChild(bars);
+    grid.appendChild(row);
+  });
+
+  container.innerHTML='';
+  container.appendChild(grid);
+}
+
+// ─── RUN ALERT ─────────────────────────────────────────────────────────────
 function checkRunAlert() {
-  // Get last 3 picks from draft log
   const allPlayers = getAllPlayersFlat();
   const log = [];
-  Object.entries(drafted).forEach(([key, val]) => {
+  Object.entries(drafted).forEach(([key,val]) => {
     if (!val) return;
-    const player = allPlayers.find(p => p.key === key);
-    if (player) log.push({...player, pickNum: val.pickNum || 0});
+    const player = allPlayers.find(p=>p.key===key);
+    if (player) log.push({...player, pickNum:val.pickNum||0});
   });
-  log.sort((a, b) => a.pickNum - b.pickNum);
+  log.sort((a,b)=>a.pickNum-b.pickNum);
   const last3 = log.slice(-3);
-  if (last3.length < 3) return;
-
-  const posCounts = {};
-  last3.forEach(p => posCounts[p.pos] = (posCounts[p.pos]||0) + 1);
-  Object.entries(posCounts).forEach(([pos, count]) => {
-    if (count >= 3) {
-      showRunAlert(`⚠ ${pos} run! ${count} ${pos}s in last 3 picks`);
-    }
+  if (last3.length<3) return;
+  const posCounts={};
+  last3.forEach(p=>posCounts[p.pos]=(posCounts[p.pos]||0)+1);
+  Object.entries(posCounts).forEach(([pos,count])=>{
+    if (count>=3) showRunAlert(`⚠ ${pos} run! ${count} ${pos}s in last 3 picks`);
   });
 }
 
 function showRunAlert(msg) {
-  const el = document.getElementById('runAlert');
-  el.textContent = msg;
-  el.style.display = 'block';
+  const el=document.getElementById('runAlert');
+  el.textContent=msg; el.style.display='block';
   if (runAlertTimer) clearTimeout(runAlertTimer);
-  runAlertTimer = setTimeout(() => { el.style.display = 'none'; }, 5000);
+  runAlertTimer=setTimeout(()=>{ el.style.display='none'; },5000);
 }
 
+// ─── SUGGESTIONS ───────────────────────────────────────────────────────────
 function renderSuggestions() {
-  const myTeam = getMyRoster();
-  const counts = {RB:0, WR:0, TE:0, QB:0};
-  myTeam.forEach(p => counts[p.pos] = (counts[p.pos]||0) + 1);
-  const allAvailable = getAllPlayersFlat().filter(p => !drafted[p.key]);
-  const scored = allAvailable.map(p => {
-    let needBoost = 0, surplusPenalty = 0;
-    if (p.pos === 'RB' && counts.RB < 2) needBoost = 3;
-    else if (p.pos === 'WR' && counts.WR < 2) needBoost = 2;
-    else if (p.pos === 'TE' && counts.TE < 1) needBoost = 1.5;
-    else if (p.pos === 'QB' && counts.QB < 1) needBoost = 1;
-    if (p.pos === 'QB' && counts.QB >= 1) surplusPenalty = p.tier > 1 ? 25 : 4;
-    if (p.pos === 'TE' && counts.TE >= 1) surplusPenalty = p.tier > 1 ? 25 : 4;
-    return {...p, score: (p.tier * 10) + (p.r * 0.1) - needBoost - (p.box ? 2 : 0) + surplusPenalty};
+  const myTeam=getMyRoster();
+  const counts={RB:0,WR:0,TE:0,QB:0};
+  myTeam.forEach(p=>counts[p.pos]=(counts[p.pos]||0)+1);
+  const allAvailable=getAllPlayersFlat().filter(p=>!drafted[p.key]);
+  const scored=allAvailable.map(p=>{
+    let needBoost=0,surplusPenalty=0;
+    if (p.pos==='RB'&&counts.RB<2) needBoost=3;
+    else if (p.pos==='WR'&&counts.WR<2) needBoost=2;
+    else if (p.pos==='TE'&&counts.TE<1) needBoost=1.5;
+    else if (p.pos==='QB'&&counts.QB<1) needBoost=1;
+    if (p.pos==='QB'&&counts.QB>=1) surplusPenalty=p.tier>1?25:4;
+    if (p.pos==='TE'&&counts.TE>=1) surplusPenalty=p.tier>1?25:4;
+    return {...p,score:(p.tier*10)+(p.r*0.1)-needBoost-(p.box?2:0)+surplusPenalty};
   });
-  scored.sort((a, b) => a.score - b.score);
-  const list = document.getElementById('suggestionList');
-  list.innerHTML = '';
-  scored.slice(0, 3).forEach((p, i) => {
-    let reason = `Tier ${p.tier}`;
-    if (p.box) reason += ' · target';
-    if (p.pos === 'RB' && counts.RB < 2) reason += ' · fills RB need';
-    if (p.pos === 'WR' && counts.WR < 2) reason += ' · fills WR need';
-    if (p.pos === 'TE' && counts.TE < 1) reason += ' · fills TE need';
-    const item = document.createElement('div');
-    item.className = 'suggestion-item';
-    item.innerHTML = `<span class="suggestion-rank">${i+1}</span><span class="suggestion-pos-tag ${p.pos}">${p.pos}</span><span class="suggestion-name">${p.n}</span><span class="suggestion-reason">${reason}</span>`;
+  scored.sort((a,b)=>a.score-b.score);
+  const list=document.getElementById('suggestionList');
+  list.innerHTML='';
+  scored.slice(0,3).forEach((p,i)=>{
+    let reason=`Tier ${p.tier}`;
+    if (p.box) reason+=' · target';
+    if (p.pos==='RB'&&counts.RB<2) reason+=' · fills RB need';
+    if (p.pos==='WR'&&counts.WR<2) reason+=' · fills WR need';
+    if (p.pos==='TE'&&counts.TE<1) reason+=' · fills TE need';
+    const item=document.createElement('div');
+    item.className='suggestion-item';
+    item.innerHTML=`<span class="suggestion-rank">${i+1}</span><span class="suggestion-pos-tag ${p.pos}">${p.pos}</span><span class="suggestion-name">${p.n}</span><span class="suggestion-reason">${reason}</span>`;
     list.appendChild(item);
   });
 }
 
+// ─── MAIN RENDER ───────────────────────────────────────────────────────────
 function render() {
-  const search = document.getElementById('search').value.toLowerCase();
-  const tierF  = document.getElementById('tierFilter').value;
-  const flagF  = document.getElementById('flagFilter').value;
-  const tbody  = document.getElementById('tbody');
-  tbody.innerHTML = '';
-  const allSorted = getPlayers(curPos);
-  const overallPick = totalDraftedCount() + 1;
-  let lastTier = null;
+  const search=document.getElementById('search').value.toLowerCase();
+  const tierF=document.getElementById('tierFilter').value;
+  const flagF=document.getElementById('flagFilter').value;
+  const tbody=document.getElementById('tbody');
+  tbody.innerHTML='';
+  const allSorted=getPlayers(curPos);
+  let lastTier=null;
 
-  allSorted.forEach(p => {
-    const key        = curPos + p.r;
-    const draftEntry = drafted[key];
-    const draftState = draftEntry?.who;
-    const isDrafted  = !!draftState;
-    const note       = notes[key] || '';
-    const adj        = rankOverrides[key] || 0;
+  allSorted.forEach(p=>{
+    const key=curPos+p.r;
+    const draftEntry=drafted[key];
+    const draftState=draftEntry?.who;
+    const isDrafted=!!draftState;
+    const note=notes[key]||'';
+    const adj=rankOverrides[key]||0;
 
-    if (search && !p.n.toLowerCase().includes(search) && !p.t.toLowerCase().includes(search)) return;
-    if (tierF && String(p.tier) !== tierF) return;
-    if (flagF === 'box'   && !p.box)    return;
-    if (flagF === 'inj'   && !p.inj)    return;
-    if (flagF === 'avail' && isDrafted) return;
+    if (search&&!p.n.toLowerCase().includes(search)&&!p.t.toLowerCase().includes(search)) return;
+    if (tierF&&String(p.tier)!==tierF) return;
+    if (flagF==='box'&&!p.box) return;
+    if (flagF==='inj'&&!p.inj) return;
+    if (flagF==='avail'&&isDrafted) return;
 
-    if (p.tier !== lastTier && p.tier > (lastTier || 0)) {
-      const d = document.createElement('tr');
-      d.className = 'tier-divider';
-      d.innerHTML = `<td colspan="8">— Tier ${p.tier}</td>`;
+    if (p.tier!==lastTier&&p.tier>(lastTier||0)) {
+      const d=document.createElement('tr');
+      d.className='tier-divider';
+      d.innerHTML=`<td colspan="8">— Tier ${p.tier}</td>`;
       tbody.appendChild(d);
-      lastTier = p.tier;
+      lastTier=p.tier;
     }
 
-    const trueRank = allSorted.findIndex(sp => sp.r === p.r && sp.n === p.n) + 1;
+    const trueRank=allSorted.findIndex(sp=>sp.r===p.r&&sp.n===p.n)+1;
 
-    // ADP value indicator
-    let adpHtml = '<span class="adp-col">—</span>';
-    if (p.adp !== null && p.adp !== undefined) {
-      const diff = p.adp - trueRank;
-      let cls = '';
-      if (diff >= 3) cls = 'value';
-      else if (diff <= -3) cls = 'reach';
-      const arrow = diff >= 3 ? '▲' : diff <= -3 ? '▼' : '';
-      adpHtml = `<span class="adp-col ${cls}">${arrow}${p.adp}</span>`;
+    let adpHtml='<span class="adp-col">—</span>';
+    if (p.adp!==null&&p.adp!==undefined) {
+      const diff=p.adp-trueRank;
+      const cls=diff>=3?'value':diff<=-3?'reach':'';
+      const arrow=diff>=3?'▲':diff<=-3?'▼':'';
+      adpHtml=`<span class="adp-col ${cls}">${arrow}${p.adp}</span>`;
     }
+    const byeHtml=p.bye?`<span class="bye-col">${p.bye}</span>`:'<span class="bye-col">—</span>';
 
-    const byeHtml = p.bye ? `<span class="bye-col">${p.bye}</span>` : '<span class="bye-col">—</span>';
-
-    const tags = [];
+    const tags=[];
     if (p.box)     tags.push('<span class="tag target">target</span>');
     if (p.inj)     tags.push('<span class="tag flagged">flagged</span>');
-    if (adj < 0)   tags.push(`<span class="tag up">▲${Math.abs(adj)}</span>`);
-    if (adj > 0)   tags.push(`<span class="tag down">▼${adj}</span>`);
-    if (draftState === 'me')    tags.push('<span class="tag mine">mine</span>');
-    if (draftState === 'other') tags.push('<span class="tag gone">drafted</span>');
+    if (adj<0)     tags.push(`<span class="tag up">▲${Math.abs(adj)}</span>`);
+    if (adj>0)     tags.push(`<span class="tag down">▼${adj}</span>`);
+    if (draftState==='me')    tags.push('<span class="tag mine">mine</span>');
+    if (draftState==='other') tags.push('<span class="tag gone">drafted</span>');
+    if (draftEntry?.auto)     tags.push('<span class="tag auto">auto</span>');
 
-    const tr = document.createElement('tr');
-    tr.className = 'player-row' + (draftState === 'other' ? ' drafted' : '') + (draftState === 'me' ? ' drafted-me' : '');
-    tr.innerHTML = `
+    const tr=document.createElement('tr');
+    tr.className='player-row'+(draftState==='other'?' drafted':'')+(draftState==='me'?' drafted-me':'');
+    tr.innerHTML=`
       <td class="rank">${trueRank}</td>
-      <td><div class="name-cell">
-        <span class="dot" style="background:${TIER_COLORS[lastTier]}"></span>
-        ${p.n}${tags.join('')}
-      </div></td>
+      <td><div class="name-cell"><span class="dot" style="background:${TIER_COLORS[lastTier]}"></span>${p.n}${tags.join('')}</div></td>
       <td class="team">${p.t}</td>
       <td class="tier-num">${lastTier}</td>
       <td>${adpHtml}</td>
@@ -681,177 +925,193 @@ function render() {
   renderSuggestions();
   renderRoster();
   renderDraftLog();
+  renderOpponents();
   renderPickTracker();
 }
 
-function saveNote(key, val) { notes[key] = val; save('notes', notes); }
+function setPos(p,el){
+  curPos=p;
+  document.querySelectorAll('.pos-tab').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  render();
+}
 
-function setDraftState(key, who) {
-  const overallPick = totalDraftedCount() + 1;
-  if (drafted[key]?.who === who) {
-    delete drafted[key];
-  } else {
-    drafted[key] = { who, pickNum: overallPick, pos: key.slice(0,2) };
-  }
-  save('drafted', drafted);
+function saveNote(key,val){ notes[key]=val; debounceSave(); }
+
+function setDraftState(key,who){
+  const overallPick=totalDraftedCount()+1;
+  if (drafted[key]?.who===who){ delete drafted[key]; } else { drafted[key]={who,pickNum:overallPick,pos:key.slice(0,2)}; }
+  debounceSave();
   checkRunAlert();
   render();
 }
 
-function clearDrafted() { drafted = {}; save('drafted', drafted); render(); }
+function clearDrafted(){ drafted={}; debounceSave(); render(); }
 
-function openAddPlayer() { document.getElementById('addPlayerModal').style.display = 'flex'; }
-function closeAddPlayer() { document.getElementById('addPlayerModal').style.display = 'none'; }
-function confirmAddPlayer() {
-  const n    = document.getElementById('ap_name').value.trim();
-  const t    = document.getElementById('ap_team').value.trim().toUpperCase();
-  const pos  = document.getElementById('ap_pos').value;
-  const tier = parseInt(document.getElementById('ap_tier').value) || 5;
-  let autoRank = DATA[pos].length + 101;
-  while (rankOverrides[pos + autoRank] !== undefined) autoRank++;
-  const rank = parseInt(document.getElementById('ap_rank').value) || autoRank;
-  if (!n || !t) return;
-  DATA[pos].push({r: rank, n, t, tier, box: false, inj: false, adp: null, bye: null, custom: true});
-  const custom = load('customPlayers', {RB:[],WR:[],TE:[],QB:[]});
-  if (!custom[pos]) custom[pos] = [];
-  custom[pos].push({r: rank, n, t, tier, box: false, inj: false});
-  save('customPlayers', custom);
+// ─── ADD PLAYER ────────────────────────────────────────────────────────────
+function openAddPlayer(){ document.getElementById('addPlayerModal').style.display='flex'; }
+function closeAddPlayer(){ document.getElementById('addPlayerModal').style.display='none'; }
+function confirmAddPlayer(){
+  const n=document.getElementById('ap_name').value.trim();
+  const t=document.getElementById('ap_team').value.trim().toUpperCase();
+  const pos=document.getElementById('ap_pos').value;
+  const tier=parseInt(document.getElementById('ap_tier').value)||5;
+  let autoRank=DATA[pos].length+101;
+  while(rankOverrides[pos+autoRank]!==undefined) autoRank++;
+  const rank=parseInt(document.getElementById('ap_rank').value)||autoRank;
+  if (!n||!t) return;
+  DATA[pos].push({r:rank,n,t,tier,box:false,inj:false,adp:null,bye:null,custom:true});
+  const custom=lsLoad('customPlayers',{RB:[],WR:[],TE:[],QB:[]});
+  if (!custom[pos]) custom[pos]=[];
+  custom[pos].push({r:rank,n,t,tier,box:false,inj:false});
+  lsSave('customPlayers',custom);
   closeAddPlayer();
-  ['ap_name','ap_team','ap_tier','ap_rank'].forEach(id => document.getElementById(id).value = '');
+  ['ap_name','ap_team','ap_tier','ap_rank'].forEach(id=>document.getElementById(id).value='');
   render();
 }
 
-async function addUpdate() {
-  const input = document.getElementById('updateInput');
-  const text  = input.value.trim();
+// ─── RANK OVERRIDE WITH CAP ────────────────────────────────────────────────
+function applyRankChange(key, delta) {
+  const current = rankOverrides[key] || 0;
+  const newVal = current + delta;
+  // Clamp to ±MAX_RANK_OVERRIDE
+  rankOverrides[key] = Math.max(-MAX_RANK_OVERRIDE, Math.min(MAX_RANK_OVERRIDE, newVal));
+}
+
+// ─── NEWS FEED ─────────────────────────────────────────────────────────────
+function buildAliasContext() {
+  return Object.entries(ALIASES).map(([alias,name])=>`"${alias}" = ${name}`).join(', ');
+}
+
+async function addUpdate(){
+  const input=document.getElementById('updateInput');
+  const text=input.value.trim();
   if (!text) return;
-  const ts = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-  const id = Date.now();
-  updates.unshift({id, text, ts, analysis: null, loading: true, sentimentOverride: null, snapshot: JSON.parse(JSON.stringify(rankOverrides))});
-  input.value = '';
+  const ts=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  const id=Date.now();
+  updates.unshift({id,text,ts,analysis:null,loading:true,sentimentOverride:null,snapshot:JSON.parse(JSON.stringify(rankOverrides))});
+  input.value='';
   renderFeed();
 
-  const playerList = Object.entries(DATA).flatMap(([pos, players]) =>
-    players.map(p => `${p.n} (${pos}, ${p.t}, Rank ${p.r}, Tier ${p.tier})`)
+  const playerList=Object.entries(DATA).flatMap(([pos,players])=>
+    players.map(p=>`${p.n} (${pos}, ${p.t}, Rank ${p.r}, Tier ${p.tier})`)
   ).join('\n');
 
-  const prompt = `You are a fantasy football analyst assistant helping with a 2026 PPR fantasy draft. A user has this draft board:
+  const aliasContext=buildAliasContext();
 
+  const prompt=`You are a fantasy football analyst assistant helping with a 2026 PPR fantasy draft.
+
+ALIAS DICTIONARY — if the update mentions any of these aliases, map them to the full player name before matching:
+${aliasContext}
+
+Also try last-name-only matching: if a last name uniquely identifies a player on the board, use the full name.
+
+Draft board:
 ${playerList}
 
-The user has added this news update: "${text}"
+News update: "${text}"
 
-IMPORTANT CONTEXT FOR SENTIMENT:
-- Phrases like "stocks rising", "stock up", "arrow up", "rising stock", upward arrow emojis (📈 ↑ ⬆), or positive analyst reactions mean POSITIVE sentiment
-- Phrases like "stocks falling", "stock down", "arrow down", downward arrow emojis (📉 ↓ ⬇), injury news, suspension news mean NEGATIVE sentiment
-- Getting more reps, first team reps, snap share increases, target share increases are POSITIVE
-- Losing reps, role changes that reduce opportunity, injury concerns are NEGATIVE
-- Read the full context carefully — a player "lining up with" another star player at the same time can mean POSITIVE opportunity sharing, not negative
+SENTIMENT RULES:
+- "stocks rising", "stock up", upward emojis (📈 ↑ ⬆), positive analyst reaction = POSITIVE
+- "stocks falling", "stock down", injury, suspension, downward emojis (📉 ↓ ⬇) = NEGATIVE
+- More reps, first team reps, snap share increase, target share increase = POSITIVE
+- Losing reps, reduced role, injury concern = NEGATIVE
 
-Respond with JSON ONLY (no markdown, no backticks, no extra text):
+Respond with JSON ONLY (no markdown, no backticks):
 {
   "sentiment": "positive"|"negative"|"neutral",
   "summary": "1-2 sentence plain English fantasy impact",
   "adjustments": [
     {
-      "player": "exact name from list above",
+      "player": "exact name from board",
       "position": "RB|WR|TE|QB",
-      "rankChange": number (negative=move up, positive=move down, 0=unchanged),
-      "tierChange": number (negative=better tier, positive=worse tier, 0=unchanged),
+      "rankChange": number (negative=up, positive=down, max ±5),
+      "tierChange": number (negative=better tier, positive=worse, 0=unchanged),
       "flagged": true|false,
       "reason": "brief reason"
     }
   ]
 }
-Only include players actually affected. rankChange should be 1-5 spots max. Return empty adjustments array if no players identifiable.`;
+Only include actually affected players. Empty array if none identifiable.`;
 
   try {
-    const res = await fetch(PROXY, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({model: 'claude-sonnet-4-6', max_tokens: 1000, messages: [{role:'user', content: prompt}]})
+    const res=await fetch(PROXY,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,messages:[{role:'user',content:prompt}]})
     });
-    const data   = await res.json();
-    const raw    = data.content?.find(c => c.type === 'text')?.text || '{}';
-    const parsed = JSON.parse(raw.replace(/```json|```/g, '').trim());
-    parsed.adjustments?.forEach(adj => {
-      const pos    = adj.position;
-      const player = DATA[pos]?.find(p => p.n === adj.player);
+    const data=await res.json();
+    const raw=data.content?.find(c=>c.type==='text')?.text||'{}';
+    const parsed=JSON.parse(raw.replace(/```json|```/g,'').trim());
+    parsed.adjustments?.forEach(adj=>{
+      const pos=adj.position;
+      const player=DATA[pos]?.find(p=>p.n===adj.player);
       if (!player) return;
-      const key = pos + player.r;
-      if (adj.rankChange !== 0) rankOverrides[key] = (rankOverrides[key] || 0) + adj.rankChange;
-      if (adj.tierChange !== 0) {
-        const base = tierOverrides[key] !== undefined ? tierOverrides[key] : player.tier;
-        tierOverrides[key] = Math.max(1, Math.min(6, base + adj.tierChange));
+      const key=pos+player.r;
+      if (adj.rankChange!==0) applyRankChange(key, adj.rankChange); // CAPPED ±8
+      if (adj.tierChange!==0){
+        const base=tierOverrides[key]!==undefined?tierOverrides[key]:player.tier;
+        tierOverrides[key]=Math.max(1,Math.min(6,base+adj.tierChange));
       }
-      if (adj.flagged) injOverrides[key] = true;
+      if (adj.flagged) injOverrides[key]=true;
     });
-    const entry = updates.find(u => u.id === id);
-    if (entry) { entry.analysis = parsed; entry.loading = false; }
-  } catch(e) {
-    const entry = updates.find(u => u.id === id);
-    if (entry) { entry.analysis = {sentiment:'neutral', summary:'Error: '+e.message, adjustments:[]}; entry.loading = false; }
+    const entry=updates.find(u=>u.id===id);
+    if (entry){entry.analysis=parsed;entry.loading=false;}
+  } catch(e){
+    const entry=updates.find(u=>u.id===id);
+    if (entry){entry.analysis={sentiment:'neutral',summary:'Error: '+e.message,adjustments:[]};entry.loading=false;}
   }
 
-  renderFeed();
-  render();
-  save('updates', updates);
-  save('rankOverrides', rankOverrides);
-  save('tierOverrides', tierOverrides);
-  save('injOverrides', injOverrides);
+  renderFeed(); render(); debounceSave();
 }
 
-function overrideSentiment(id, sentiment) {
-  const entry = updates.find(u => u.id === id);
-  if (!entry || !entry.analysis) return;
-  rankOverrides = JSON.parse(JSON.stringify(entry.snapshot));
-  if (entry.sentimentOverride !== sentiment) {
-    entry.sentimentOverride = sentiment;
-    const flip = sentiment === 'positive' ? -1 : 1;
-    (entry.analysis.adjustments || []).forEach(adj => {
-      const player = DATA[adj.position]?.find(p => p.n === adj.player);
+function overrideSentiment(id,sentiment){
+  const entry=updates.find(u=>u.id===id);
+  if (!entry||!entry.analysis) return;
+  rankOverrides=JSON.parse(JSON.stringify(entry.snapshot));
+  if (entry.sentimentOverride!==sentiment){
+    entry.sentimentOverride=sentiment;
+    const flip=sentiment==='positive'?-1:1;
+    (entry.analysis.adjustments||[]).forEach(adj=>{
+      const player=DATA[adj.position]?.find(p=>p.n===adj.player);
       if (!player) return;
-      const key = adj.position + player.r;
-      if (adj.rankChange !== 0) rankOverrides[key] = (rankOverrides[key] || 0) + (Math.abs(adj.rankChange) * flip);
+      const key=adj.position+player.r;
+      if (adj.rankChange!==0) applyRankChange(key, Math.abs(adj.rankChange)*flip);
     });
-  } else {
-    entry.sentimentOverride = null;
-  }
-  save('updates', updates); save('rankOverrides', rankOverrides);
-  renderFeed(); render();
+  } else { entry.sentimentOverride=null; }
+  debounceSave(); renderFeed(); render();
 }
 
-function removeUpdate(id) {
-  const entry = updates.find(u => u.id === id);
-  if (entry && entry.snapshot) { rankOverrides = JSON.parse(JSON.stringify(entry.snapshot)); save('rankOverrides', rankOverrides); }
-  updates = updates.filter(u => u.id !== id);
-  save('updates', updates);
-  renderFeed(); render();
+function removeUpdate(id){
+  const entry=updates.find(u=>u.id===id);
+  if (entry&&entry.snapshot){ rankOverrides=JSON.parse(JSON.stringify(entry.snapshot)); }
+  updates=updates.filter(u=>u.id!==id);
+  debounceSave(); renderFeed(); render();
 }
 
-function renderFeed() {
-  const feed = document.getElementById('feed');
-  if (!updates.length) { feed.innerHTML = '<div class="no-feed">No updates yet.</div>'; return; }
-  feed.innerHTML = '';
-  updates.forEach(u => {
-    const effectiveSentiment = u.sentimentOverride || u.analysis?.sentiment || 'neutral';
-    const el = document.createElement('div');
-    el.className = `feed-item ${effectiveSentiment}`;
-    let analysisHtml = '';
-    if (u.loading) {
-      analysisHtml = '<div class="analysing">Analysing…</div>';
-    } else if (u.analysis) {
-      let movesHtml = '';
-      (u.analysis.adjustments || []).forEach(adj => {
-        const dir   = adj.rankChange < 0 ? 'up' : adj.rankChange > 0 ? 'down' : 'watch';
-        const label = adj.rankChange < 0 ? `▲${Math.abs(adj.rankChange)} spots` : adj.rankChange > 0 ? `▼${adj.rankChange} spots` : 'watch';
-        movesHtml += `<span class="move-tag ${dir}">${adj.player}: ${label}</span>`;
+function renderFeed(){
+  const feed=document.getElementById('feed');
+  if (!updates.length){feed.innerHTML='<div class="no-feed">No updates yet.</div>';return;}
+  feed.innerHTML='';
+  updates.forEach(u=>{
+    const effectiveSentiment=u.sentimentOverride||u.analysis?.sentiment||'neutral';
+    const el=document.createElement('div');
+    el.className=`feed-item ${effectiveSentiment}`;
+    let analysisHtml='';
+    if (u.loading){
+      analysisHtml='<div class="analysing">Analysing…</div>';
+    } else if (u.analysis){
+      let movesHtml='';
+      (u.analysis.adjustments||[]).forEach(adj=>{
+        const dir=adj.rankChange<0?'up':adj.rankChange>0?'down':'watch';
+        const label=adj.rankChange<0?`▲${Math.abs(adj.rankChange)} spots`:adj.rankChange>0?`▼${adj.rankChange} spots`:'watch';
+        movesHtml+=`<span class="move-tag ${dir}">${adj.player}: ${label}</span>`;
       });
-      analysisHtml = `<div class="feed-analysis">${u.analysis.summary}${movesHtml ? '<br><br>'+movesHtml : ''}</div>`;
+      analysisHtml=`<div class="feed-analysis">${u.analysis.summary}${movesHtml?'<br><br>'+movesHtml:''}</div>`;
     }
-    const posActive = u.sentimentOverride === 'positive' ? 'active-pos' : '';
-    const negActive = u.sentimentOverride === 'negative' ? 'active-neg' : '';
-    el.innerHTML = `
+    const posActive=u.sentimentOverride==='positive'?'active-pos':'';
+    const negActive=u.sentimentOverride==='negative'?'active-neg':'';
+    el.innerHTML=`
       <div class="feed-top">
         <span class="feed-ts">${u.ts}</span>
         <span class="feed-text">${u.text}</span>
@@ -865,7 +1125,18 @@ function renderFeed() {
   });
 }
 
-loadSheet();
+// ─── INIT ──────────────────────────────────────────────────────────────────
+async function init(){
+  await Promise.all([loadSheet(), supaLoad()]);
+  document.getElementById('loading').style.display='none';
+  document.getElementById('app').style.display='block';
+  document.getElementById('numTeams').value=numTeams;
+  document.getElementById('mySlot').value=mySlot;
+  render();
+  renderFeed();
+}
+
+init();
 </script>
 </body>
 </html>
